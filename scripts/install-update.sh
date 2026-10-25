@@ -42,13 +42,13 @@ rollback() {
 }
 trap rollback ERR INT TERM HUP
 read_info() { /usr/libexec/PlistBuddy -c "Print :$2" "$1/Contents/Info.plist"; }
-[[ "$(read_info "$TARGET" CFBundleIdentifier)" == "com.paulfleury.activetask" ]]
-[[ "$(read_info "$TARGET" CFBundleShortVersionString)" == "$OLD_VERSION" ]]
-[[ "$(read_info "$CANDIDATE" CFBundleIdentifier)" == "com.paulfleury.activetask" ]]
-[[ "$(read_info "$CANDIDATE" CFBundleShortVersionString)" == "$NEW_VERSION" ]]
-/usr/bin/codesign --verify --deep --strict "$CANDIDATE"
-/bin/mv "$TARGET" "$BACKUP"
-/bin/mv "$CANDIDATE" "$TARGET"
-/usr/bin/open -n "$TARGET"
+[[ "$(read_info "$TARGET" CFBundleIdentifier)" == "com.paulfleury.activetask" ]] || rollback
+[[ "$(read_info "$TARGET" CFBundleShortVersionString)" == "$OLD_VERSION" ]] || rollback
+[[ "$(read_info "$CANDIDATE" CFBundleIdentifier)" == "com.paulfleury.activetask" ]] || rollback
+[[ "$(read_info "$CANDIDATE" CFBundleShortVersionString)" == "$NEW_VERSION" ]] || rollback
+/usr/bin/codesign --verify --deep --strict "$CANDIDATE" || rollback
+/bin/mv "$TARGET" "$BACKUP" || rollback
+/bin/mv "$CANDIDATE" "$TARGET" || rollback
+/usr/bin/open -n "$TARGET" || rollback
 trap - ERR INT TERM HUP
 echo "Update installed. Previous app retained at: $BACKUP"

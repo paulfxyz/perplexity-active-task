@@ -175,9 +175,11 @@ struct UpdaterTests {
         try check(manager.fileExists(atPath: rollback.stage.appendingPathComponent("Failed Active Task.app").path), "failed app retained")
         try check(!manager.fileExists(atPath: installed.deletingLastPathComponent().appendingPathComponent(".active-task-update-lock").path), "lock released")
         let stale = try UpdateCore.prepare(archive: archive, version: "2.0.1", target: installed, helperSource: helper)
+        print("Late-preflight test: installed \(try UpdateCore.readVersion(installed)), expected old version 1.1.0.")
         try rejects("target changed before helper preflight", containing: "Update failed; restoring the previous app.") {
-            try UpdateCore.run("/bin/bash", [stale.helper.path, "999999", installed.path, stale.candidate.path,
-                                            stale.stage.path, "1.1.0", stale.newVersion, "active-task-update-v1"])
+            let output = try UpdateCore.run("/bin/bash", [stale.helper.path, "999999", installed.path, stale.candidate.path,
+                                                         stale.stage.path, "1.1.0", stale.newVersion, "active-task-update-v1"])
+            print("Unexpected helper success: \(output)")
         }
         try check(try UpdateCore.readVersion(installed) == "2.0.0", "late preflight leaves installed version intact")
         try check(!manager.fileExists(atPath: stale.stage.appendingPathComponent("Previous Active Task.app").path),
