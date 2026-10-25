@@ -30,5 +30,5 @@ plutil -lint "$APP/Contents/Info.plist"
 codesign --force --deep --sign - "$APP"
 codesign --verify --deep --strict --verbose=2 "$APP"
 ditto -c -k --sequesterRsrc --keepParent "$APP" "$OUT/Active-Task-macOS-universal.zip"
-shasum -a 256 "$OUT/Active-Task-macOS-universal.zip" > "$OUT/SHA256SUMS.txt"
+(cd "$OUT" && shasum -a 256 Active-Task-macOS-universal.zip > SHA256SUMS.txt)
 echo "Built $APP"
