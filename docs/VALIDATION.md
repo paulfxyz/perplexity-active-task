@@ -13,7 +13,7 @@ The [GitHub Actions workflow](https://github.com/paulfxyz/perplexity-active-task
 - **Universal compilation:** Optimized arm64 and x86_64 executables, combined and architecture-checked.
 - **Bundle checks:** Plist validation, generated icon presence, ad-hoc signature verification, and absence of the screenshot fixture from the shipping app.
 - **Launch smoke test:** Starts the native executable and verifies it remains alive for twelve seconds. This checks liveness, not UI correctness or login.
-- **Documentation capture:** A separately compiled native build renders synthetic tasks and captures its own overview, settings panel, session-cost row, and organization-cost suffix.
+- **Documentation capture:** A separately compiled native build renders synthetic tasks and captures its own overview, settings panel, session-cost row, and organization-cost suffix. The actual WebKit-injected values must equal `US$13.13` and `(US$600.00)` before capture succeeds.
 - **Release integrity:** The tag must match the bundle version, and the ZIP must match its SHA-256 checksum before publication.
 
 For the result of a particular version, inspect that tag's workflow run rather than assuming a green badge proves every platform interaction.

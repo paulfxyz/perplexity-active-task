@@ -597,6 +597,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
     private func captureCostScene(_ scene: String, path: String, name: String, completion: @escaping () -> Void) {
         webView.evaluateJavaScript("window.showScene('\(scene)')") { _, error in
             if let error = error { fatalError("Scene failed: \(error)") }
+            let selector = scene == "session" ? "[data-at-cost-value]" : "[data-at-cost-org]"
+            let expected = scene == "session" ? "US$13.13" : "(US$600.00)"
             let script = """
             if (!window.__atDocLocation) {
               window.__atDocLocation = { hostname: 'www.perplexity.ai', pathname: '\(path)' };
@@ -605,6 +607,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
               window.__atDocLocation.pathname = '\(path)';
             }
             window.__atDocCost.refresh();
+            if (document.querySelector('\(selector)')?.textContent !== '\(expected)') {
+              throw new Error('Native WebKit cost display did not match the expected fixture amount');
+            }
             """
             self.webView.evaluateJavaScript(script, in: nil, in: .defaultClient) { result in
                 if case .failure(let error) = result { fatalError("Cost fixture injection failed: \(error)") }

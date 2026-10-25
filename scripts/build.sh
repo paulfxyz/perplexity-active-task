@@ -24,8 +24,11 @@ lipo -create "$OUT/ActiveTask-arm64" "$OUT/ActiveTask-x86_64" -output "$APP/Cont
 cp Resources/Info.plist "$APP/Contents/Info.plist"
 cp Sources/Sidebar.js "$APP/Contents/Resources/Sidebar.js"
 cp Sources/Cost.js Sources/CostDisplay.js "$APP/Contents/Resources/"
+cp LICENSE "$APP/Contents/Resources/LICENSE.txt"
 if [[ "${SCREENSHOT_BUILD:-0}" == "1" ]]; then
   cp tests/fixtures/ScreenshotFixture.html "$APP/Contents/Resources/ScreenshotFixture.html"
+else
+  rm -f "$APP/Contents/Resources/ScreenshotFixture.html"
 fi
 xcrun swift scripts/icon.swift "$OUT/icon-1024.png"
 for SIZE in 16 32 128 256 512; do
