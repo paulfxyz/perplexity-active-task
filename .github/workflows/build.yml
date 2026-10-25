@@ -1,0 +1,60 @@
+name: Build macOS app
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test sidebar behavior
+        run: node --test tests/sidebar.test.cjs
+      - name: Test native window behavior
+        run: |
+          mkdir -p build
+          xcrun swiftc Sources/Behavior.swift tests/behavior.swift -o build/behavior-tests
+          build/behavior-tests
+      - name: Build universal macOS app
+        run: bash scripts/build.sh
+      - name: Check both architectures
+        run: |
+          lipo -verify_arch arm64 x86_64 "build/Active Task.app/Contents/MacOS/ActiveTask"
+          test -s "build/Active Task.app/Contents/Resources/AppIcon.icns"
+      - name: Launch smoke test
+        run: |
+          "build/Active Task.app/Contents/MacOS/ActiveTask" >build/launch.log 2>&1 &
+          PID=$!
+          sleep 12
+          if ! kill -0 "$PID" 2>/dev/null; then
+            cat build/launch.log
+            exit 1
+          fi
+          kill "$PID"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Active-Task-macOS-universal
+          path: |
+            build/Active-Task-macOS-universal.zip
+            build/SHA256SUMS.txt
+            build/icon-1024.png
+          retention-days: 30
+      - name: Publish private release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            build/Active-Task-macOS-universal.zip build/SHA256SUMS.txt build/icon-1024.png \
+            --title "Active Task $GITHUB_REF_NAME" \
+            --notes-file RELEASE_NOTES.md \
+            --verify-tag
