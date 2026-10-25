@@ -1,6 +1,6 @@
 <div align="center">
   <img src="assets/app.png" width="112" height="112" alt="Active Task app icon: an activity pulse, neural nodes, and an AI sparkle">
-  <h1>Active Task</h1>
+  <h1>Perplexity Active Task</h1>
   <p>Your AI work. Quietly in view.</p>
   <p>
     <a href="https://github.com/paulfxyz/perplexity-active-task/releases/latest"><img src="https://img.shields.io/github/v/release/paulfxyz/perplexity-active-task?style=flat-square&color=216c51&labelColor=282828" alt="Latest release"></a>
