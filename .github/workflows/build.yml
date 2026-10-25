@@ -3,6 +3,8 @@ on:
   push:
     branches: [main]
     tags: ['v*']
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -10,8 +12,6 @@ jobs:
   build:
     runs-on: macos-15
     timeout-minutes: 15
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -30,6 +30,7 @@ jobs:
         run: |
           lipo "build/Active Task.app/Contents/MacOS/ActiveTask" -verify_arch arm64 x86_64
           test -s "build/Active Task.app/Contents/Resources/AppIcon.icns"
+          test ! -e "build/Active Task.app/Contents/Resources/ScreenshotFixture.html"
       - name: Launch smoke test
         run: |
           "build/Active Task.app/Contents/MacOS/ActiveTask" >build/launch.log 2>&1 &
@@ -40,6 +41,17 @@ jobs:
             exit 1
           fi
           kill "$PID"
+      - name: Build isolated documentation app
+        env:
+          SCREENSHOT_BUILD: '1'
+        run: BUILD_DIR="$RUNNER_TEMP/active-task-doc-build" bash scripts/build.sh
+      - name: Capture native UI with synthetic tasks
+        env:
+          SCREENSHOT_APP: ${{ runner.temp }}/active-task-doc-build/Active Task.app/Contents/MacOS/ActiveTask
+        run: |
+          node -e 'const {spawnSync}=require("node:child_process"); const r=spawnSync(process.env.SCREENSHOT_APP,["--screenshots",process.cwd()+"/build/screenshots"],{timeout:60000,stdio:"inherit"}); if(r.error)throw r.error; process.exit(r.status??1)'
+          test -s build/screenshots/screenshot-overview.png
+          test -s build/screenshots/screenshot-settings.png
       - uses: actions/upload-artifact@v4
         with:
           name: Active-Task-macOS-universal
@@ -47,14 +59,31 @@ jobs:
             build/Active-Task-macOS-universal.zip
             build/SHA256SUMS.txt
             build/icon-1024.png
+            build/screenshots/*.png
           retention-days: 30
-      - name: Publish private release
-        if: startsWith(github.ref, 'refs/tags/v')
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: Active-Task-macOS-universal
+          path: dist
+      - name: Verify release version and checksum
+        run: |
+          VERSION="$(sed -n 's/.*<key>CFBundleShortVersionString<\/key><string>\([^<]*\)<\/string>.*/\1/p' Resources/Info.plist)"
+          test "$GITHUB_REF_NAME" = "v$VERSION"
+          (cd dist && sha256sum -c SHA256SUMS.txt)
+      - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "$GITHUB_REF_NAME" \
-            build/Active-Task-macOS-universal.zip build/SHA256SUMS.txt build/icon-1024.png \
+            dist/Active-Task-macOS-universal.zip dist/SHA256SUMS.txt dist/icon-1024.png \
             --title "Active Task $GITHUB_REF_NAME" \
             --notes-file RELEASE_NOTES.md \
             --verify-tag

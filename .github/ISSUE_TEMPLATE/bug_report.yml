@@ -1,0 +1,38 @@
+name: Bug report
+description: Report a reproducible problem without sharing account data.
+body:
+  - type: markdown
+    attributes:
+      value: "Do not include cookies, verification codes, passwords, or private task content. Report security issues using SECURITY.md."
+  - type: input
+    id: version
+    attributes:
+      label: Active Task version
+      placeholder: "1.1.0"
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: macOS version and Mac architecture
+      placeholder: "macOS version, Apple silicon or Intel"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Use synthetic or redacted examples.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Safe screenshots or diagnostics
+      description: Review and redact every attachment before submitting.

@@ -5,20 +5,27 @@ if [[ "$(uname -s)" != "Darwin" ]]; then
   echo "Build on macOS with Xcode Command Line Tools installed." >&2
   exit 1
 fi
-OUT="$PWD/build"
+OUT="${BUILD_DIR:-$PWD/build}"
 APP="$OUT/Active Task.app"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$OUT/AppIcon.iconset"
 SDK="$(xcrun --sdk macosx --show-sdk-path)"
+FLAGS=("-O")
+if [[ "${SCREENSHOT_BUILD:-0}" == "1" ]]; then
+  FLAGS+=("-D" "SCREENSHOT_BUILD")
+fi
 for ARCH in arm64 x86_64; do
   # Swift requires top-level application statements in a file called main.swift.
   cp Sources/App.swift "$OUT/main.swift"
-  xcrun swiftc -swift-version 5 -O -sdk "$SDK" -target "$ARCH-apple-macos13.0" \
+  xcrun swiftc -swift-version 5 "${FLAGS[@]}" -sdk "$SDK" -target "$ARCH-apple-macos13.0" \
     -framework AppKit -framework WebKit Sources/Behavior.swift "$OUT/main.swift" \
     -o "$OUT/ActiveTask-$ARCH"
 done
 lipo -create "$OUT/ActiveTask-arm64" "$OUT/ActiveTask-x86_64" -output "$APP/Contents/MacOS/ActiveTask"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
 cp Sources/Sidebar.js "$APP/Contents/Resources/Sidebar.js"
+if [[ "${SCREENSHOT_BUILD:-0}" == "1" ]]; then
+  cp tests/fixtures/ScreenshotFixture.html "$APP/Contents/Resources/ScreenshotFixture.html"
+fi
 xcrun swift scripts/icon.swift "$OUT/icon-1024.png"
 for SIZE in 16 32 128 256 512; do
   sips -z "$SIZE" "$SIZE" "$OUT/icon-1024.png" --out "$OUT/AppIcon.iconset/icon_${SIZE}x${SIZE}.png" >/dev/null

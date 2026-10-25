@@ -1,45 +1,120 @@
-# Active Task
+<div align="center">
+  <img src="assets/app.png" width="112" height="112" alt="Active Task app icon: an activity pulse, neural nodes, and an AI sparkle">
+  <h1>Active Task</h1>
+  <p>Your AI work. Quietly in view.</p>
+  <p>
+    <a href="https://github.com/paulfxyz/perplexity-active-task/releases/latest"><img src="https://img.shields.io/github/v/release/paulfxyz/perplexity-active-task?style=flat-square&color=216c51&labelColor=282828" alt="Latest release"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-216c51?style=flat-square&labelColor=282828" alt="MIT license"></a>
+    <img src="https://img.shields.io/badge/macOS-13%2B-23382f?style=flat-square&logo=apple&logoColor=white&labelColor=282828" alt="macOS 13 or later">
+    <img src="https://img.shields.io/badge/build-Universal-216c51?style=flat-square&labelColor=282828" alt="Apple silicon and Intel">
+    <img src="https://img.shields.io/badge/native-Swift_%2B_WebKit-23382f?style=flat-square&labelColor=282828" alt="Native Swift and WebKit">
+    <a href="https://github.com/paulfxyz/perplexity-active-task/actions/workflows/build.yml"><img src="https://github.com/paulfxyz/perplexity-active-task/actions/workflows/build.yml/badge.svg" alt="Build and tests"></a>
+  </p>
+  <p><a href="https://github.com/paulfxyz/perplexity-active-task/releases/latest">Download for Mac</a> · <a href="INSTALL.md">Install guide</a> · <a href="CHANGELOG.md">Changelog</a> · <a href="PRIVACY.md">Privacy</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
+  <img src=".github/img/banner.svg" width="100%" alt="Active Task: keep your AI work in sight. A lightweight native macOS companion. Illustrated banner, not an app screenshot.">
+</div>
 
-A tiny native macOS window for **Perplexity Computer's active tasks**, made for Paul. It opens directly to [the active-task list](https://www.perplexity.ai/computer/tasks?status=active), remembers its size and position, and stays out of the way.
+## Your tasks, without the tab hunt
 
-Independent personal utility, not an official Perplexity product.
+Active Task is a tiny native Mac companion for [Perplexity Computer's active tasks](https://www.perplexity.ai/computer/tasks?status=active). It puts the existing website in a compact, resizable window, with the sidebar hidden where possible and a login session that survives relaunching.
 
-## Download and install
+Keep it above your other windows, let it fade when you are working elsewhere, or use it like an ordinary window. No Electron runtime, API key, browser extension, account scraping, or project-operated backend is required.
 
-Get `Active-Task-macOS-universal.zip` from this private repository's [Releases](https://github.com/paulfxyz/perplexity-active-task/releases). It supports Apple silicon and Intel Macs running macOS 13 or later.
+It is a window onto Perplexity, not a second task engine. You still need a Perplexity account with access to Computer, and the app cannot add account features or bypass website restrictions.
 
-Unzip, move **Active Task.app** to Applications, and open it. This personal build is ad-hoc signed, **not Apple-notarized**. If macOS blocks it, first try opening it, then use System Settings > Privacy & Security > Open Anyway, only after verifying you downloaded this repository's build. Alternatively, build locally using the script below. No security settings need to be globally disabled.
+## Install or update
 
-## Use it
+1. Download **Active-Task-macOS-universal.zip** from the [latest release](https://github.com/paulfxyz/perplexity-active-task/releases/latest).
+2. Unzip it, move **Active Task.app** to Applications, and open it.
+3. Sign in directly inside the app. Use the sliders button or **Active Task → Settings…** to choose your window behavior.
 
-- **Sign in:** Log in directly to Perplexity inside the app. WebKit stores this app's cookies and session locally across launches. It has its own session, separate from Comet or Safari; it never imports your browser cookies.
-- **Small and resizable:** Starts at 520 × 700, resizes down to 360 × 360, and remembers its window frame. Use View > Zoom Out if you want denser content.
-- **Always on Top:** Enabled by default. Toggle it from the sliders button.
-- **Dim When Inactive:** Optional, independent of floating. Choose 35%, 50%, 65%, 80%, or 90% inactive opacity; refocusing restores full opacity.
-- **Normal Window Behavior:** One click disables floating and dimming, so other windows naturally cover it.
-- **Sidebar:** Hidden by default using conservative, reversible DOM hooks. Turn off Hide Website Sidebar to restore the original inline styles. The site's own collapsed state may still need reopening using its sidebar button.
-- **Menu bar:** The activity-wave icon brings the window back after closing it. Closing the window does not quit; use ⌘Q to quit.
-- **Navigation:** ⌘1 returns to active tasks, ⌘R reloads, ⌘B opens the current page in your default browser.
-- **Downloads:** Exported files use a native Save dialog. Links to outside sites open in your default browser.
+Already using 1.0.0? Quit it, replace the app, and reopen. The bundle identifier stays the same, so preferences and the app's WebKit session remain associated with the same application. Legacy opacity values migrate to the nearest supported level, with ties going to the lower level. There is no automatic updater.
 
-## Login caveats
+**Community build: ad-hoc signed, not Developer ID signed or Apple-notarized.** macOS may require approval in Privacy & Security. Do not disable Gatekeeper or management policies to install; see the [installation and troubleshooting guide](INSTALL.md).
 
-This is a genuine WebKit view, not a proxy or a password collector. Email/verification-code login is the recommended path if offered by Perplexity. Google or Apple may refuse authentication in an embedded browser; the app supports sign-in popups but cannot override identity-provider policy. Opening your browser does **not** transfer its login back into the app. If the site sends a verification link to your browser, return to the app and enter a code if available.
+<div align="center">
+  <img src="docs/screenshot-overview.png" width="520" alt="Running native Active Task window with three clearly labelled synthetic sample tasks">
+</div>
 
-The authenticated Perplexity DOM is not bundled or controlled by this project. Sidebar suppression is best-effort, not a guaranteed API. It deliberately does not remove arbitrary navigation or guess at hashed class names. Login, actual task rendering, and current site-specific sidebar behavior must be checked on your account on first launch.
+The overview uses synthetic tasks in a separately compiled documentation build, not your account or the live Perplexity interface. Screenshots combine the running app's native window frame with an actual WebKit snapshot; see [how they are captured](docs/SCREENSHOTS.md).
 
-## Build
+## What you get
 
-Requires macOS and Apple's Xcode Command Line Tools. There are no npm, Swift Package Manager, or third-party runtime dependencies.
+- **A small native window:** Starts at 520 × 700, resizes down to 360 × 360, and remembers its position and size.
+- **Always on top:** Keep the task window floating above ordinary windows, or turn floating off.
+- **Optional inactive dimming:** Choose **5%, 10%, 20%, 30%, 40%, 50%, 60%, 70%, 80%, 90%, or 95% opacity**. Lower means more transparent; focusing the task window restores 100%.
+- **Normal window behavior:** One action disables both floating and dimming so other windows naturally cover it.
+- **A real settings panel:** Open Settings with **⌘,**. Floating and dimming are independent; selecting an opacity level turns dimming on.
+- **Persistent sign-in:** A dedicated local WebKit session, separate from Safari or Comet. There is no cookie import from another browser.
+- **A quieter sidebar:** Conservative, reversible suppression of known sidebar elements, with an explicit collapse-button fallback.
+- **Mac integration:** Menu-bar restore, native file saving, keyboard shortcuts, zoom, and sign-in popup windows.
+- **Original artwork:** A mint activity waveform, connected neural nodes, and an AI sparkle. No copied Perplexity app icon.
+
+<div align="center">
+  <img src="docs/screenshot-settings.png" width="450" alt="Actual native settings panel with always-on-top, dimming, sidebar and inactive-opacity controls">
+</div>
+
+Fresh installations default to floating on, dimming off, and 60% inactive opacity when enabled. Settings changes apply immediately; opening Settings takes focus away from the task window, so dimming can become visible while you adjust it.
+
+## Three ways to keep it nearby
+
+| Mode | Always on top | Dim when inactive | What happens |
+| --- | --- | --- | --- |
+| Persistent companion | On | Off | Stays above ordinary windows at full opacity |
+| Quiet companion | On | On | Stays above ordinary windows, fading to your chosen opacity when unfocused |
+| Ordinary window | Off | Off | Other windows naturally cover it |
+
+Dimming also works with floating off. The app does not make transparent areas click-through, keep your Mac awake, or guarantee visibility above system dialogs, other elevated windows, or across every full-screen/Spaces arrangement.
+
+## Keyboard shortcuts
+
+| Shortcut | Action |
+| --- | --- |
+| ⌘, | Open settings |
+| ⌘1 | Return to active tasks |
+| ⌘R | Reload |
+| ⌘B | Open current page in the default browser |
+| ⌘+ / ⌘− / ⌘0 | Zoom in / out / reset |
+| ⌘W | Close the window; keep the app in the menu bar |
+| ⌘Q | Quit |
+
+## Local session, real website
+
+```text
+Perplexity website in a persistent WKWebView
+                    │
+          Native resizable AppKit window
+                    │
+    Floating + focus-aware opacity + sidebar controls
+                    │
+       Local preferences and WebKit session
+```
+
+The website handles your account and tasks. Active Task adds window behavior around it; it does not request API credentials, copy browser cookies, log page contents, or relay your task data through a separate service.
+
+The sidebar script runs only on Perplexity's main frame in WebKit's isolated content world, without a JavaScript-to-native command bridge. Normal WebKit TLS and web-security behavior remain enabled. External HTTP(S) links open in your browser, and downloads ask where to save.
+
+“Local” does not mean offline: the embedded Perplexity website and its identity providers load their own resources. See [Privacy](PRIVACY.md), [Security](SECURITY.md), and the [architecture notes](docs/ARCHITECTURE.md).
+
+## What to expect
+
+- **Sign-in policies vary:** Some Google, Apple, SSO, or verification flows reject embedded browsers. Use Perplexity's email/code option if offered; this app does not bypass provider policies.
+- **Browser login is separate:** Opening the same page in Safari or Comet does not sign the app in. Email verification links may open externally; return to the app and enter a code if available.
+- **Sidebar hiding is best-effort:** Perplexity can change its markup. The app deliberately does not hide generic navigation or guess at hashed CSS classes.
+- **Closing is not quitting:** Restore the window from the activity-wave menu-bar icon. Use Quit to stop the app.
+- **This is not an official integration:** There are no native task notifications, task-count badge, background-task API, automatic updates, or offline task sync.
+- **Validation has limits:** CI builds both architectures, tests behavior, checks signing integrity, launches the app, and generates fixture screenshots. It does not establish live sign-in compatibility or account-specific sidebar behavior; see [validation notes](docs/VALIDATION.md).
+
+## Develop and test
+
+Requires macOS 13+ and Apple's Xcode Command Line Tools to build. Node.js 22 is used for JavaScript tests; there are no npm or Swift-package dependencies.
 
 ```sh
+git clone https://github.com/paulfxyz/perplexity-active-task.git
+cd perplexity-active-task
 bash scripts/build.sh
 open "build/Active Task.app"
 ```
-
-The script compiles optimized arm64 and x86_64 binaries, combines them into one universal executable, renders the original icon with AppKit, creates an ICNS, ad-hoc signs the bundle, verifies its signature, and creates a ZIP plus SHA-256 checksum.
-
-## Test
 
 ```sh
 node --test tests/sidebar.test.cjs
@@ -48,23 +123,20 @@ xcrun swiftc Sources/Behavior.swift tests/WindowBehaviorTests.swift -o build/beh
 build/behavior-tests
 ```
 
-GitHub Actions additionally compiles both architectures, checks the bundle and icon, verifies the signature, and launches the application for a short process-liveness smoke test. That test is not authenticated UI acceptance.
+The build creates a universal executable, generates the original icon using AppKit, ad-hoc signs and verifies the bundle, and produces a ZIP plus SHA-256 checksum. Screenshot fixtures are compiled into a separate documentation build only and are excluded from release bundles.
 
-## Privacy and implementation
+Contributions, bug reports, and focused improvements are welcome. Start with [Contributing](CONTRIBUTING.md).
 
-Native AppKit window + `WKWebView`, using macOS's built-in WebKit. No app analytics, API keys, backend, local web server, page-content logging, or custom credential handling. Perplexity and its identity providers still handle your account under their own policies.
+## Open source, honestly
 
-Sidebar JavaScript runs only on Perplexity's main frame in WebKit's isolated content world. There is no JavaScript-to-native command bridge. External top-level HTTP(S) links open in your browser; unknown custom schemes are not launched. WebKit's normal TLS and web security behavior remain enabled.
+### Disclaimer: 100% vibe coding
 
-Preferences are stored under `com.paulfleury.activetask` in macOS UserDefaults. Authentication state lives in the default persistent WebKit website data store for this app.
+Built by **Paul Fleury** with AI assistance. I am an entrepreneur building useful software with AI, not presenting this as the work of a traditional full-time software engineer.
 
-## Manual acceptance checklist
+The code is open so it can be inspected, challenged, and improved. Tests and explicit limitations matter more than claims of perfection; treat this as a community utility, not a security-certified or official Perplexity client.
 
-- Sign in using your preferred login method, quit, reopen, and verify the session survives.
-- Verify the actual active-task list is visible and responsive at compact and larger sizes.
-- Confirm the sidebar is suppressed and the toggle restores navigation.
-- Verify floating above another app, normal occlusion, inactive dimming, opacity levels, and full-opacity focus return.
-- Check OAuth popup focus, Spaces/full-screen behavior, frame restoration, menu-bar reopen, external links, and a real file download.
-- Verify Gatekeeper's first-launch experience on the intended Mac.
+Active Task is independent and is not affiliated with or endorsed by Perplexity or Apple. Perplexity's website and trademarks remain their owners' property; the code and original app artwork here are independently produced.
 
-These checks require a real logged-in Mac. CI does not claim to complete them.
+## License
+
+MIT. Source code, original artwork, documentation, and synthetic screenshot fixtures are covered by [LICENSE](LICENSE). Third-party websites, trademarks, and platform frameworks are not relicensed by this project.

@@ -1,0 +1,16 @@
+name: Feature request
+description: Suggest a focused improvement to the native companion.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Keep scope focused on the native companion, not website account features.
+    validations:
+      required: true
