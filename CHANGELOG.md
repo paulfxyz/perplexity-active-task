@@ -1,6 +1,19 @@
 # Changelog
 
+## 2.0.0 · 2026-10-25
+
+- Corrected net cost to **US$0.012 per credit**, consistent with 10,000/US$120, 50,000/US$600, and 100,000/US$1,200.
+- Corrected 1.1.0's fivefold overstatement for both session and organization equivalents.
+- Derived hover disclosures from calculator constants and added exact pack/reported-reading regressions.
+- Added a native stable-version checker and optional launch/six-hour checks.
+- Added confirmed in-app download, SHA-256/size verification, strict release/archive/bundle/architecture checks, and an unprivileged replace/restart helper.
+- Retain the previous bundle and private log; roll back immediate swap/open-command failures.
+- Added native installer/reopen and fault-injected rollback integration tests plus a live GitHub release/download probe.
+- Preserved the stable bundle identifier, WebKit store, preferences, all eleven opacity levels, and compact native window.
+
 ## 1.1.0 · 2026-10-25
+
+Historical note: the rate introduced here was superseded by 2.0.0 after the pack-price clarification. Do not use 1.1.0's dollar estimates with the corrected packs.
 
 - Added a live **Cost equivalent** row under Session usage and an inline equivalent beside available organization credits.
 - Use the newly specified **US$600 net / 10,000 credits = US$0.06 per credit** assumption; this is not the older browser extension's rate.

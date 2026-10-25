@@ -7,6 +7,7 @@ Active Task is a native window around Perplexity's website, with local USD equiv
 - **Preferences:** Window frame, zoom, floating, sidebar, dimming, and inactive-opacity choices use macOS UserDefaults under `com.paulfleury.activetask`.
 - **Website session:** Perplexity cookies, website storage, and other browser-managed data use this application's persistent default WKWebView data store.
 - **Downloads:** Files are saved to the location you choose in the native Save dialog.
+- **Updater data:** Confirmed updates use temporary downloads and a private staging folder beside the app. Previous bundles and a local installation log are retained for recovery; they do not contain copied WebKit session data.
 
 The app does not import Safari or Comet cookies, request API keys, log page contents, or implement its own password collection. The local website store can contain sensitive account data; “local” does not mean separately encrypted by this application.
 
@@ -16,7 +17,9 @@ Cost-display scripts read the visible session-credit or organization-credit text
 
 The embedded website contacts Perplexity, identity providers, and resources they include. Their handling of your account, task data, and website telemetry is controlled by those services, not by this project.
 
-External links open in your default browser. The app has no automatic updater or background GitHub-check mechanism; downloading updates or opening repository links contacts GitHub through your browser.
+External links open in your default browser. Starting in 2.0.0, the app itself can contact GitHub's public Releases API to check for updates. Optional automatic checks run after launch and every six hours, and can be turned off in Settings.
+
+Only a confirmed update downloads a release archive from GitHub's release infrastructure. The updater uses a separate ephemeral client with cookies, URL credentials, and cache disabled; it sends a generic updater User-Agent, not Perplexity cookies, task content, usage readings, or account data. GitHub still sees normal network metadata such as the request and IP address.
 
 ## Public repository assets
 

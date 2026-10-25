@@ -17,7 +17,8 @@ for ARCH in arm64 x86_64; do
   # Swift requires top-level application statements in a file called main.swift.
   cp Sources/App.swift "$OUT/main.swift"
   xcrun swiftc -swift-version 5 "${FLAGS[@]}" -sdk "$SDK" -target "$ARCH-apple-macos13.0" \
-    -framework AppKit -framework WebKit Sources/Behavior.swift "$OUT/main.swift" \
+    -framework AppKit -framework WebKit -framework CryptoKit Sources/Behavior.swift \
+    Sources/UpdateCore.swift Sources/UpdateHTTP.swift Sources/UpdateController.swift "$OUT/main.swift" \
     -o "$OUT/ActiveTask-$ARCH"
 done
 lipo -create "$OUT/ActiveTask-arm64" "$OUT/ActiveTask-x86_64" -output "$APP/Contents/MacOS/ActiveTask"
@@ -25,6 +26,7 @@ cp Resources/Info.plist "$APP/Contents/Info.plist"
 cp Sources/Sidebar.js "$APP/Contents/Resources/Sidebar.js"
 cp Sources/Cost.js Sources/CostDisplay.js "$APP/Contents/Resources/"
 cp LICENSE "$APP/Contents/Resources/LICENSE.txt"
+cp scripts/install-update.sh "$APP/Contents/Resources/InstallUpdate.sh"
 if [[ "${SCREENSHOT_BUILD:-0}" == "1" ]]; then
   cp tests/fixtures/ScreenshotFixture.html "$APP/Contents/Resources/ScreenshotFixture.html"
 else

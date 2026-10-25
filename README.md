@@ -28,7 +28,9 @@ It is a window onto Perplexity, not a second task engine. You still need a Perpl
 2. Unzip it, move **Active Task.app** to Applications, and open it.
 3. Sign in directly inside the app. Use the sliders button or **Active Task → Settings…** to choose your window behavior.
 
-Already using 1.0.0? Quit it, replace the app, and reopen. The bundle identifier stays the same, so preferences and the app's WebKit session remain associated with the same application. Legacy opacity values migrate to the nearest supported level, with ties going to the lower level. There is no automatic updater.
+Upgrading from 1.x? Install **2.0.0 manually once**: older versions do not contain the new updater. Quit the app, replace it, and reopen. The bundle identifier stays the same, so preferences and the app's WebKit session remain associated with the same application.
+
+From 2.0.0 onward, use **Active Task → Check for Updates…** or the button in Settings. Optional automatic checks run after launch and every six hours, but installation always requires **Download & Restart** confirmation. Updates are downloaded, verified, staged, and installed in place; the previous app is retained for recovery. See [the update process and its limits](docs/UPDATES.md).
 
 **Community build: ad-hoc signed, not Developer ID signed or Apple-notarized.** macOS may require approval in Privacy & Security. Do not disable Gatekeeper or management policies to install; see the [installation and troubleshooting guide](INSTALL.md).
 
@@ -49,6 +51,7 @@ The overview uses synthetic tasks in a separately compiled documentation build, 
 - **A quieter sidebar:** Conservative, reversible suppression of known sidebar elements, with an explicit collapse-button fallback.
 - **Mac integration:** Menu-bar restore, native file saving, keyboard shortcuts, zoom, and sign-in popup windows.
 - **Cost context, inline:** A **Cost equivalent** row below Session usage and a dollar equivalent beside Available org credits, using the explicit net rate described below.
+- **In-app updates:** A version check, download progress, verified replacement/restart, optional background checks, and a previous-app backup. No silent installations or administrator prompts.
 - **Original artwork:** A mint activity waveform, connected neural nodes, and an AI sparkle. No copied Perplexity app icon.
 
 <div align="center">
@@ -69,20 +72,22 @@ Dimming also works with floating off. The app does not make transparent areas cl
 
 ## Credits are a unit. Dollars are context.
 
-The app uses the author's stated net purchase rate: **US$600 for 10,000 credits**, or **US$0.06 per credit**. This is an account-specific assumption built into this release, not Perplexity's official pricing or a universal tariff.
+Version **2.0.0 corrects the conversion to US$0.012 per credit**, based on the clarified packs: **10,000 credits for US$120, 50,000 for US$600, or 100,000 for US$1,200**. This is an account-specific net purchase assumption, not an official pricing feed or universal tariff.
+
+**1.1.0 used US$0.06 per credit and overstated equivalents fivefold under these corrected prices.** Upgrade before using its estimates; the underlying Perplexity credit counts were never modified.
 
 | Display | What the equivalent means |
 | --- | --- |
-| Session usage → Cost equivalent | The displayed session credits used, multiplied by US$0.06 |
+| Session usage → Cost equivalent | The displayed session credits used, multiplied by US$0.012 |
 | Available org credits → `(US$…)` | The equivalent of the remaining shared credit pool, not money spent or cash redeemable |
 
-For example, **218.77 credits → US$13.13**, and **10,000 available credits → US$600.00**. Original credit values remain unchanged; the additions follow readable DOM updates and disclose the rate on hover. Positive values below a cent show `<US$0.01`, not zero.
+For example, **218.77 credits → US$2.63**, **11,717.13 credits → US$140.61**, and **10,000 available credits → US$120.00**. Original credit values remain unchanged; the additions follow readable DOM updates and disclose the rate on hover. Positive values below a cent show `<US$0.01`, not zero.
 
 <table>
   <tr><th align="left">Session usage</th><th align="left">Organization pool</th></tr>
   <tr>
-    <td><img src="docs/screenshot-session-cost.png" width="460" alt="Synthetic session fixture with 218.77 credits and the actual injected Cost equivalent row showing US$13.13"></td>
-    <td><img src="docs/screenshot-organization-cost.png" width="460" alt="Synthetic organization fixture with 10,000 available credits and the actual injected US$600.00 equivalent"></td>
+    <td><img src="docs/screenshot-session-cost.png" width="460" alt="Synthetic session fixture with 218.77 credits and the actual injected Cost equivalent row showing US$2.63"></td>
+    <td><img src="docs/screenshot-organization-cost.png" width="460" alt="Synthetic organization fixture with 10,000 available credits and the actual injected US$120.00 equivalent"></td>
   </tr>
 </table>
 
@@ -129,7 +134,7 @@ Page-enhancement scripts run only on Perplexity's main frame in WebKit's isolate
 - **Browser login is separate:** Opening the same page in Safari or Comet does not sign the app in. Email verification links may open externally; return to the app and enter a code if available.
 - **Sidebar hiding is best-effort:** Perplexity can change its markup. The app deliberately does not hide generic navigation or guess at hashed CSS classes.
 - **Closing is not quitting:** Restore the window from the activity-wave menu-bar icon. Use Quit to stop the app.
-- **This is not an official integration:** There are no native task notifications, task-count badge, background-task or billing API, automatic updates, or offline task sync.
+- **This is not an official integration:** There are no native task notifications, task-count badge, background-task or billing API, unattended installations, or offline task sync.
 - **Validation has limits:** CI builds both architectures, tests behavior, checks signing integrity, launches the app, and generates fixture screenshots. It does not establish live sign-in compatibility or account-specific sidebar behavior; see [validation notes](docs/VALIDATION.md).
 
 ## Develop and test
@@ -158,7 +163,7 @@ Contributions, bug reports, and focused improvements are welcome. Start with [Co
 ## Companion projects
 
 - **[AI Credit Checker](https://github.com/paulfxyz/ai-credit-checker):** A separate menu-bar dashboard for available balances across AI and infrastructure providers.
-- **[Perplexity Cost Transparency](https://github.com/paulfxyz/pplx-cost-transparency):** The browser-extension inspiration for inline USD context. Active Task reuses its conservative parsing approach, but uses the new **US$600 net / 10,000 credits** assumption specified for this app.
+- **[Perplexity Cost Transparency](https://github.com/paulfxyz/pplx-cost-transparency):** The browser-extension inspiration for inline USD context. Active Task reuses its conservative parsing approach and now uses the corrected **US$600 net / 50,000 credits** assumption.
 
 ## Open source, honestly
 

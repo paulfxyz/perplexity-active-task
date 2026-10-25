@@ -1,6 +1,6 @@
 # Install Active Task
 
-Active Task 1.1.0 supports macOS 13 or later on Apple silicon and Intel. Download the universal ZIP from [GitHub Releases](https://github.com/paulfxyz/perplexity-active-task/releases/latest); there is no installer package or automatic updater.
+Active Task 2.0.0 supports macOS 13 or later on Apple silicon and Intel. Download the universal ZIP from [GitHub Releases](https://github.com/paulfxyz/perplexity-active-task/releases/latest); there is no privileged installer package.
 
 ## First installation
 
@@ -21,11 +21,25 @@ shasum -a 256 -c SHA256SUMS.txt
 
 This checks that your file matches that release's checksum; it does not substitute for independent trust in the publisher or Apple notarization.
 
-## Update from 1.0.0
+## Update from 1.x
 
 Quit Active Task using ⌘Q, replace the app in Applications, and reopen. Keep the same application name and bundle identifier, `com.paulfleury.activetask`; the app continues using the associated preferences and WebKit data store.
 
+This one-time manual installation is required because 1.x does not include an updater. Version 2.0.0 also corrects 1.1.0's fivefold-overstated dollar equivalents: the clarified purchase packs imply **US$0.012 per credit**, not US$0.06.
+
 The 1.1.0 opacity menu is exactly 5%, 10%, 20%, 30%, 40%, 50%, 60%, 70%, 80%, 90%, and 95%. Older values migrate to the nearest supported level, with ties choosing the lower one: 65% becomes 60%, and 35% becomes 30%. Dimming remains disabled if it was disabled before the update.
+
+## Update inside 2.0.0 and later
+
+1. Open Active Task > Check for Updates… or use the Settings button.
+2. If a newer stable release is available, review the version and choose **Download & Restart**.
+3. The app downloads and verifies the GitHub release ZIP, stages a matching universal bundle, then quits. A helper replaces the app and reopens it.
+
+Automatic checks are enabled by default after launch and every six hours; turn them off in Settings if preferred. They do not install anything automatically or send Perplexity account data.
+
+The application must be named `Active Task.app` and located in a writable folder. Mounted volumes, App Translocation, symlinked app bundles, unsupported archives, and non-writable folders are refused without requesting administrator rights. Move the app to a suitable Applications folder or update manually instead.
+
+The previous app and local log are retained in a hidden `.active-task-update-<UUID>` sibling folder. Immediate replacement or launch-command errors trigger rollback; later crashes or website login failures are not automatically detected. See [updates and manual recovery](docs/UPDATES.md).
 
 ## Sign-in troubleshooting
 

@@ -21,6 +21,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
     private var errorLabel: NSTextField!
     private var preferencesWindow: NSWindow?
     private var preferenceControls: [Int: NSControl] = [:]
+    private var updater: UpdateController!
+    private var updateStatusLabel: NSTextField?
     #if SCREENSHOT_BUILD
     private var screenshotDirectory: URL?
     #endif
@@ -44,6 +46,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         ])
         defaults.set(WindowBehavior.normalizedInactiveOpacity(defaults.double(forKey: "inactiveOpacity")),
                      forKey: "inactiveOpacity")
+        updater = UpdateController(defaults: defaults,
+                                   currentVersion: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.0.0")
+        updater.onStatusChange = { [weak self] _ in self?.refreshUpdateStatus() }
         buildMenu()
         buildWindow()
         buildStatusItem()
@@ -60,6 +65,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         }
         #endif
         webView.load(URLRequest(url: homeURL))
+        #if !SCREENSHOT_BUILD
+        updater.start()
+        #endif
     }
 
     private func buildWindow() {
@@ -177,6 +185,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         let appMenu = NSMenu()
         appMenu.addItem(withTitle: "About Active Task", action: #selector(about), keyEquivalent: "")
         addAction("Settings…", #selector(showPreferences), key: ",", to: appMenu)
+        addAction("Check for Updates…", #selector(checkForUpdates), to: appMenu)
         appMenu.addItem(.separator())
         appMenu.addItem(withTitle: "Hide Active Task", action: #selector(NSApplication.hide(_:)), keyEquivalent: "h")
         appMenu.addItem(withTitle: "Quit Active Task", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
@@ -230,6 +239,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         addAction("Show Active Task", #selector(showWindow(_:)), to: menu)
         addAction("Active tasks", #selector(goHome), to: menu)
         addAction("Organization Usage", #selector(goOrganization), to: menu)
+        addAction("Check for Updates…", #selector(checkForUpdates), to: menu)
         menu.addItem(.separator())
         addAction("Quit Active Task", #selector(NSApplication.terminate(_:)), to: menu)
         menu.items.last?.target = NSApp
@@ -256,6 +266,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         menu.addItem(opacity)
         addAction("Normal Window Behavior", #selector(useNormalBehavior), to: menu)
         addAction("Window Settings…", #selector(showPreferences), to: menu)
+        addAction("Check for Updates…", #selector(checkForUpdates), to: menu)
         menu.addItem(.separator())
         let sidebar = menu.addItem(withTitle: "Hide Website Sidebar", action: #selector(toggleSidebar), keyEquivalent: "")
         sidebar.target = self
@@ -282,7 +293,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
             preferencesWindow.makeKeyAndOrderFront(nil)
             return
         }
-        let panel = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 450, height: 380),
+        let panel = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 450, height: 530),
                              styleMask: [.titled, .closable], backing: .buffered, defer: false)
         panel.title = "Window Settings"
         panel.isReleasedWhenClosed = false
@@ -331,6 +342,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         let normal = NSButton(title: "Use Normal Window Behavior", target: self, action: #selector(resetPreferences))
         normal.bezelStyle = .rounded
         stack.addArrangedSubview(normal)
+        let updatesTitle = NSTextField(labelWithString: "Software updates")
+        updatesTitle.font = .systemFont(ofSize: 14, weight: .semibold)
+        stack.addArrangedSubview(updatesTitle)
+        let automatic = NSButton(checkboxWithTitle: "Automatically check for updates", target: self,
+                                 action: #selector(preferenceChanged(_:)))
+        automatic.tag = 5
+        preferenceControls[5] = automatic
+        stack.addArrangedSubview(automatic)
+        let updateStatus = NSTextField(wrappingLabelWithString: "")
+        updateStatus.font = .systemFont(ofSize: 12)
+        updateStatus.textColor = .secondaryLabelColor
+        updateStatus.preferredMaxLayoutWidth = 394
+        updateStatusLabel = updateStatus
+        stack.addArrangedSubview(updateStatus)
+        let check = NSButton(title: "Check for Updates…", target: self, action: #selector(checkForUpdates))
+        check.bezelStyle = .rounded
+        stack.addArrangedSubview(check)
         preferencesWindow = panel
         refreshPreferenceControls()
         panel.center()
@@ -343,7 +371,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         (preferenceControls[3] as? NSButton)?.state = hideSidebar ? .on : .off
         (preferenceControls[4] as? NSPopUpButton)?.selectItem(
             withTag: Int((defaults.double(forKey: "inactiveOpacity") * 100).rounded()))
+        (preferenceControls[5] as? NSButton)?.state = defaults.bool(forKey: "automaticUpdateChecks") ? .on : .off
+        refreshUpdateStatus()
     }
+
+    private func refreshUpdateStatus() {
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
+        updateStatusLabel?.stringValue = "Active Task \(version). \(updater.statusText)"
+    }
+
+    @objc private func checkForUpdates() { updater.check(manual: true) }
 
     @objc private func preferenceChanged(_ sender: NSControl) {
         switch sender.tag {
@@ -353,6 +390,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         case 4:
             defaults.set(Double((sender as! NSPopUpButton).selectedTag()) / 100, forKey: "inactiveOpacity")
             dimWhenInactive = true
+        case 5: updater.setAutomaticChecks((sender as! NSButton).state == .on)
         default: break
         }
         refreshPreferenceControls()
@@ -598,7 +636,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         webView.evaluateJavaScript("window.showScene('\(scene)')") { _, error in
             if let error = error { fatalError("Scene failed: \(error)") }
             let selector = scene == "session" ? "[data-at-cost-value]" : "[data-at-cost-org]"
-            let expected = scene == "session" ? "US$13.13" : "(US$600.00)"
+            let expected = scene == "session" ? "US$2.63" : "(US$120.00)"
             let script = """
             if (!window.__atDocLocation) {
               window.__atDocLocation = { hostname: 'www.perplexity.ai', pathname: '\(path)' };

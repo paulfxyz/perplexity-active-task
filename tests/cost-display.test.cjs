@@ -28,8 +28,9 @@ test('adds exactly one row immediately below native Session usage', async () => 
     const doc = dom.window.document;
     const row = doc.querySelector('[data-at-cost-row]');
     assert.equal(row.previousElementSibling.querySelector('#credits').textContent, '218.77 credits');
-    assert.match(row.textContent, /Cost equivalentUS\$13\.13/);
-    assert.match(row.title, /US\$600 net \/ 10,000 credits/);
+    assert.match(row.textContent, /Cost equivalentUS\$2\.63/);
+    assert.match(row.title, /US\$600 net \/ 50,000 credits/);
+    assert.match(row.title, /US\$0\.012 per credit/);
     assert.match(row.title, /not an invoice/i);
     assert.equal(doc.querySelectorAll('[data-at-cost-row]').length, 1);
   } finally { dom.window.close(); }
@@ -40,10 +41,10 @@ test('updates after both text-node and subtree changes', async () => {
     const doc = dom.window.document;
     doc.querySelector('#credits').firstChild.nodeValue = '200 credits';
     await tick();
-    assert.equal(doc.querySelector('[data-at-cost-value]').textContent, 'US$12.00');
+    assert.equal(doc.querySelector('[data-at-cost-value]').textContent, 'US$2.40');
     doc.querySelector('#credits').textContent = '1,000 credits';
     await tick();
-    assert.equal(doc.querySelector('[data-at-cost-value]').textContent, 'US$60.00');
+    assert.equal(doc.querySelector('[data-at-cost-value]').textContent, 'US$12.00');
   } finally { dom.window.close(); }
 });
 test('does not duplicate rows after React remounts or script reinjection', async () => {
@@ -54,7 +55,7 @@ test('does not duplicate rows after React remounts or script reinjection', async
     doc.querySelector('#usage').outerHTML = session('300 credits');
     await tick();
     assert.equal(doc.querySelectorAll('[data-at-cost-row]').length, 1);
-    assert.equal(doc.querySelector('[data-at-cost-value]').textContent, 'US$18.00');
+    assert.equal(doc.querySelector('[data-at-cost-value]').textContent, 'US$3.60');
   } finally { dom.window.close(); }
 });
 test('removes and restores the row as the usage panel closes and opens', async () => {
@@ -87,7 +88,7 @@ test('adds available-pool equivalent without converting refill or spend totals',
     const doc = dom.window.document;
     assert.equal(doc.querySelectorAll('[data-at-cost-org]').length, 1);
     assert.equal(doc.querySelector('#pool').firstChild.nodeValue, '10,000');
-    assert.equal(doc.querySelector('[data-at-cost-org]').textContent, '(US$600.00)');
+    assert.equal(doc.querySelector('[data-at-cost-org]').textContent, '(US$120.00)');
     assert.match(doc.querySelector('[data-at-cost-org]').title, /NOT money spent/);
     assert.equal(doc.querySelector('[data-at-cost-row]'), null);
   } finally { dom.window.close(); }
@@ -95,7 +96,7 @@ test('adds available-pool equivalent without converting refill or spend totals',
 test('supports the three explicit English organization label variants', async () => {
   for (const label of ['Available org credits', 'Available organization credits', 'Available organisation credits']) {
     const dom = await setup(organization(label), 'https://perplexity.ai/account/org/credits-usage');
-    try { assert.equal(dom.window.document.querySelector('[data-at-cost-org]').textContent, '(US$600.00)'); }
+    try { assert.equal(dom.window.document.querySelector('[data-at-cost-org]').textContent, '(US$120.00)'); }
     finally { dom.window.close(); }
   }
 });
@@ -105,11 +106,11 @@ test('organization updates do not read their own dollar suffix', async () => {
     const doc = dom.window.document;
     doc.querySelector('#pool').firstChild.nodeValue = '5,000';
     await tick();
-    assert.equal(doc.querySelector('[data-at-cost-org]').textContent, '(US$300.00)');
+    assert.equal(doc.querySelector('[data-at-cost-org]').textContent, '(US$60.00)');
     doc.querySelector('#pool').textContent = '2,000';
     await tick();
     assert.equal(doc.querySelectorAll('[data-at-cost-org]').length, 1);
-    assert.equal(doc.querySelector('[data-at-cost-org]').textContent, '(US$120.00)');
+    assert.equal(doc.querySelector('[data-at-cost-org]').textContent, '(US$24.00)');
   } finally { dom.window.close(); }
 });
 test('loading pool shows Unavailable while compact unsupported values hide the suffix', async () => {
@@ -124,7 +125,7 @@ test('loading pool shows Unavailable while compact unsupported values hide the s
     assert.equal(doc.querySelector('[data-at-cost-org]'), null);
     doc.querySelector('#pool').textContent = '10,000';
     await tick();
-    assert.equal(doc.querySelector('[data-at-cost-org]').textContent, '(US$600.00)');
+    assert.equal(doc.querySelector('[data-at-cost-org]').textContent, '(US$120.00)');
   } finally { dom.window.close(); }
 });
 test('SPA navigation removes obsolete rows and mounts the correct display', async () => {
@@ -134,7 +135,7 @@ test('SPA navigation removes obsolete rows and mounts the correct display', asyn
     dom.window.document.body.innerHTML = organization();
     await tick();
     assert.equal(dom.window.document.querySelector('[data-at-cost-row]'), null);
-    assert.equal(dom.window.document.querySelector('[data-at-cost-org]').textContent, '(US$600.00)');
+    assert.equal(dom.window.document.querySelector('[data-at-cost-org]').textContent, '(US$120.00)');
     dom.reconfigure({ url: 'https://www.perplexity.ai/computer/tasks?status=active' });
     dom.window.dispatchEvent(new dom.window.PopStateEvent('popstate'));
     await tick();
@@ -155,6 +156,6 @@ test('never modifies unrelated routes or origins', async () => {
 });
 test('bounded fallback handles a modest native row class change', async () => {
   const dom = await setup(session('100 credits').replace('group/context-pane-row', 'updated-row-class'));
-  try { assert.equal(dom.window.document.querySelector('[data-at-cost-value]').textContent, 'US$6.00'); }
+  try { assert.equal(dom.window.document.querySelector('[data-at-cost-value]').textContent, 'US$1.20'); }
   finally { dom.window.close(); }
 });

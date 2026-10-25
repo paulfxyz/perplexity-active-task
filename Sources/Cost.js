@@ -1,10 +1,11 @@
 /* Active Task | MIT License
  * Parser adapted from Paul Fleury's MIT-licensed pplx-cost-transparency.
- * This app uses the newly specified NET rate, not that project's old rate.
+ * Corrected net purchase rate: 10,000 / US$120, 50,000 / US$600,
+ * and 100,000 / US$1,200 all imply US$0.012 per credit.
  */
 (function (root) {
   'use strict';
-  const CREDIT_PACK = 10_000;
+  const CREDIT_PACK = 50_000;
   const PACK_PRICE_USD = 600;
   const USD_PER_CREDIT = PACK_PRICE_USD / CREDIT_PACK;
   const formatter = new Intl.NumberFormat('en-US', {

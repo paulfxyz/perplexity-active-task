@@ -1,29 +1,33 @@
-# Active Task 1.1.0
+# Active Task 2.0.0
 
-Your AI work. Quietly in view.
+Correct credit math, plus confirmed in-app updates.
 
-## What's new
+## Corrected cost equivalents
 
-- **Cost equivalent** beneath Session usage, plus a USD equivalent beside available organization credits, using **US$600 net / 10,000 credits = US$0.06 per credit**.
-- Live DOM updates preserve original counts, avoid duplicate additions, and never guess at unreadable or abbreviated credit values. Estimates are account-specific, not invoices.
-- **⌘2** opens organization Usage; available-pool equivalents are distinct from money spent.
-- Eleven inactive-opacity choices: **5%, 10%, 20%, 30%, 40%, 50%, 60%, 70%, 80%, 90%, and 95%**. The low values really work; the old 25% floor is removed.
-- A native **Window Settings** panel, accessible from the sliders menu or **⌘,**.
-- Smooth migration from older opacity preferences, with a 60% fresh-install default and dimming still off by default.
-- A public MIT repository with screenshots, original banner, badges, contribution guidance, and detailed privacy, security, installation, and validation notes.
+The clarified packs are **10,000 credits for US$120**, **50,000 for US$600**, and **100,000 for US$1,200**. All mean **US$0.012 per credit**.
 
-## Download
+Version 1.1.0 used US$0.06 and overstated the equivalent fivefold under those packs. Version 2.0.0 fixes both Session usage and available organization credits, derives the hover rate from the calculator constants, and adds regression tests for all packs and reported readings.
 
-Download `Active-Task-macOS-universal.zip`, unzip it, and move **Active Task.app** to Applications. This universal build supports Apple silicon and Intel on macOS 13+.
+- 11,688.38 credits → **US$140.26**
+- 11,717.13 credits → **US$140.61**
+- 50,000 credits → **US$600.00**
 
-The community app is ad-hoc signed, **not Developer ID signed or Apple-notarized**. If macOS blocks opening, verify the download and use Privacy & Security > Open Anyway if offered. Do not disable Gatekeeper.
+This changes only the displayed estimate. Original Perplexity credit values and billing are untouched.
 
-## Updating
+## In-app updates
 
-Quit 1.0.0, replace the application, and reopen it. The bundle identifier is unchanged; the app continues using its local preferences and WebKit store. A previous 65% opacity becomes 60%, and 35% becomes 30%. There is no automatic updater.
+- **Check for Updates…** in the application menu, menu-bar menu, sliders menu, and Settings.
+- Current version/status in Settings, with optional launch and six-hour automatic checks.
+- Explicit **Download & Restart** confirmation; no silent installation.
+- Trusted GitHub redirects, bounded downloads, SHA-256 and size checks, archive checks, bundle/version/architecture validation, and code-signature integrity verification.
+- Unprivileged in-place replacement and reopen, previous-app backup, and rollback on immediate replacement/open-command failures.
 
-## Scope and limits
+See [the full update process and trust limits](https://github.com/paulfxyz/perplexity-active-task/blob/main/docs/UPDATES.md).
 
-Active Task is an independent native window onto the Perplexity website, not an official client or API integration. Login compatibility, sidebar hiding, and credit-label detection depend on the live website and identity-provider policies; authenticated acceptance is separate from CI. Documentation screenshots use synthetic tasks in an isolated development build.
+## Install this release
 
-See the [README](https://github.com/paulfxyz/perplexity-active-task#readme), [installation guide](https://github.com/paulfxyz/perplexity-active-task/blob/main/INSTALL.md), and [validation notes](https://github.com/paulfxyz/perplexity-active-task/blob/main/docs/VALIDATION.md).
+**From 1.x, install 2.0.0 manually once.** Quit the old app, download and unzip `Active-Task-macOS-universal.zip`, replace the app in Applications, and reopen. The bundle identifier is unchanged; the application continues using its local preferences and WebKit store.
+
+The universal app supports macOS 13+ on Apple silicon and Intel. It remains ad-hoc signed, **not Apple-notarized**; macOS or managed-device policies may require approval or prevent installation. The updater does not bypass Gatekeeper or request administrator access.
+
+Live login and DOM-label acceptance remain separate from automated native tests and synthetic screenshots. Estimates use the stated net rate, not a live billing API or invoice.

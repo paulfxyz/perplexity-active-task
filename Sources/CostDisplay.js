@@ -15,7 +15,7 @@
     const ANCHOR = 'button[aria-label="About session usage" i]';
     const OWN = '[data-at-cost-row], [data-at-cost-org]';
     const ORG_LABEL = /^Available\s+(?:org|organization|organisation)\s+credits$/i;
-    const RATE = 'US$600 net / 10,000 credits = US$0.06 per credit. Account-specific estimate, not an invoice.';
+    const RATE = `US$${money.PACK_PRICE_USD.toLocaleString('en-US')} net / ${money.CREDIT_PACK.toLocaleString('en-US')} credits = US$${money.USD_PER_CREDIT} per credit. Account-specific estimate, not an invoice.`;
     const sessions = new Map();
     const organizations = new Map();
     let queued = false;
