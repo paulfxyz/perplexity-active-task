@@ -17,8 +17,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Test sidebar behavior
-        run: node --test tests/sidebar.test.cjs
+      - name: Test sidebar and cost display behavior
+        run: |
+          npm ci
+          npm test
       - name: Test native window behavior
         run: |
           mkdir -p build
@@ -52,6 +54,8 @@ jobs:
           node -e 'const {spawnSync}=require("node:child_process"); const r=spawnSync(process.env.SCREENSHOT_APP,["--screenshots",process.cwd()+"/build/screenshots"],{timeout:60000,stdio:"inherit"}); if(r.error)throw r.error; process.exit(r.status??1)'
           test -s build/screenshots/screenshot-overview.png
           test -s build/screenshots/screenshot-settings.png
+          test -s build/screenshots/screenshot-session-cost.png
+          test -s build/screenshots/screenshot-organization-cost.png
       - uses: actions/upload-artifact@v4
         with:
           name: Active-Task-macOS-universal

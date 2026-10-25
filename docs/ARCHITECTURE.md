@@ -1,6 +1,6 @@
 # Architecture
 
-Active Task is one small AppKit application with a WKWebView. It has no package-manager dependencies, embedded HTTP server, Electron runtime, account API integration, or project backend.
+Active Task is one small AppKit application with a WKWebView. It has no third-party runtime dependencies, embedded HTTP server, Electron runtime, account API integration, or project backend. jsdom is a development-only dependency for DOM integration tests.
 
 ## Source map
 
@@ -9,6 +9,8 @@ Active Task is one small AppKit application with a WKWebView. It has no package-
 | `Sources/App.swift` | App lifecycle, native window/menu/settings, WebKit navigation, popup and download delegates |
 | `Sources/Behavior.swift` | Pure opacity calculation, supported levels, legacy-preference normalization |
 | `Sources/Sidebar.js` | Main-frame-only, isolated-world, reversible sidebar suppression |
+| `Sources/Cost.js` | Strict credit parsing and the disclosed net-rate calculation |
+| `Sources/CostDisplay.js` | Route-scoped live session and organization cost additions |
 | `Resources/Info.plist` | Stable bundle identity, release version, macOS minimum |
 | `scripts/icon.swift` | Original vector artwork rendered using AppKit |
 | `scripts/build.sh` | Dual-architecture compilation, icon generation, signing, ZIP, checksum |
@@ -29,6 +31,8 @@ The release uses the app's persistent default WebKit store. Perplexity owns the 
 Sign-in popups share WebKit's supplied configuration. There is no custom OAuth-token interception, provider-policy modification, or external-browser cookie transfer.
 
 Sidebar code only changes known sidebar elements that do not contain the main content. It records previous inline styles and restores them when disabled, watches SPA child-list changes, and falls back to explicit collapse controls. It intentionally avoids broad `<nav>` suppression.
+
+Cost code reads only the exact session-usage anchor and supported available-organization-credit labels on their corresponding routes. It uses idempotent DOM writes, scoped mutation handling, and separate mount maps for used credits and available credits. It does not fetch account data or change original credit text; see [Cost equivalent](COST_EQUIVALENT.md).
 
 ## Documentation isolation
 

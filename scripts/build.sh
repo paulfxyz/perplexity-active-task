@@ -23,6 +23,7 @@ done
 lipo -create "$OUT/ActiveTask-arm64" "$OUT/ActiveTask-x86_64" -output "$APP/Contents/MacOS/ActiveTask"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
 cp Sources/Sidebar.js "$APP/Contents/Resources/Sidebar.js"
+cp Sources/Cost.js Sources/CostDisplay.js "$APP/Contents/Resources/"
 if [[ "${SCREENSHOT_BUILD:-0}" == "1" ]]; then
   cp tests/fixtures/ScreenshotFixture.html "$APP/Contents/Resources/ScreenshotFixture.html"
 fi

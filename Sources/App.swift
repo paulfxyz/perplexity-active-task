@@ -70,6 +70,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         configuration.websiteDataStore = .default()
         #endif
         configuration.preferences.javaScriptCanOpenWindowsAutomatically = true
+        for resource in ["Cost", "CostDisplay"] {
+            if let url = Bundle.main.url(forResource: resource, withExtension: "js"),
+               let source = try? String(contentsOf: url, encoding: .utf8) {
+                configuration.userContentController.addUserScript(WKUserScript(
+                    source: source, injectionTime: .atDocumentEnd, forMainFrameOnly: true, in: .defaultClient))
+            }
+        }
         if let url = Bundle.main.url(forResource: "Sidebar", withExtension: "js"),
            let source = try? String(contentsOf: url, encoding: .utf8) {
             let enabled = hideSidebar ? "true" : "false"
@@ -189,6 +196,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         view.title = "View"
         let viewMenu = NSMenu(title: "View")
         addAction("Active tasks", #selector(goHome), key: "1", to: viewMenu)
+        addAction("Organization Usage", #selector(goOrganization), key: "2", to: viewMenu)
         addAction("Reload", #selector(reload), key: "r", to: viewMenu)
         addAction("Open current page in browser", #selector(openInBrowser), key: "b", to: viewMenu)
         viewMenu.addItem(.separator())
@@ -221,6 +229,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         let menu = NSMenu()
         addAction("Show Active Task", #selector(showWindow(_:)), to: menu)
         addAction("Active tasks", #selector(goHome), to: menu)
+        addAction("Organization Usage", #selector(goOrganization), to: menu)
         menu.addItem(.separator())
         addAction("Quit Active Task", #selector(NSApplication.terminate(_:)), to: menu)
         menu.items.last?.target = NSApp
@@ -370,6 +379,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         // Update future navigations as well as the current SPA document.
         let controller = webView.configuration.userContentController
         controller.removeAllUserScripts()
+        for resource in ["Cost", "CostDisplay"] {
+            if let url = Bundle.main.url(forResource: resource, withExtension: "js"),
+               let source = try? String(contentsOf: url, encoding: .utf8) {
+                controller.addUserScript(WKUserScript(source: source, injectionTime: .atDocumentEnd,
+                                                     forMainFrameOnly: true, in: .defaultClient))
+            }
+        }
         if let url = Bundle.main.url(forResource: "Sidebar", withExtension: "js"),
            let source = try? String(contentsOf: url, encoding: .utf8) {
             let script = "window.__activeTaskSidebarEnabled = \(hideSidebar ? "true" : "false");\n" + source
@@ -386,6 +402,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         applyWindowBehavior()
     }
     @objc private func goHome() { showWindow(nil); webView.load(URLRequest(url: homeURL)) }
+    @objc private func goOrganization() {
+        showWindow(nil)
+        webView.load(URLRequest(url: URL(string: "https://www.perplexity.ai/account/org/credits-usage")!))
+    }
     @objc private func reload() { webView.reload() }
     @objc private func openInBrowser() { NSWorkspace.shared.open(webView.url ?? homeURL) }
     @objc private func zoomIn() { setZoom(webView.pageZoom + 0.1) }
@@ -558,16 +578,46 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
             guard let image = image else { fatalError("WebKit snapshot failed: \(String(describing: error))") }
             do {
                 try self.saveWindowSnapshot(self.window, webImage: image, name: "screenshot-overview.png")
-                self.dimWhenInactive = true
-                self.showPreferences()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    do {
-                        try self.saveWindowSnapshot(self.preferencesWindow!, name: "screenshot-settings.png")
-                        print("Documentation screenshots saved to \(directory.path)")
-                        NSApp.terminate(nil)
-                    } catch { fatalError("Settings screenshot failed: \(error)") }
+                self.captureCostScene("session", path: "/computer/tasks/documentation", name: "screenshot-session-cost.png") {
+                    self.captureCostScene("organization", path: "/account/org/credits-usage", name: "screenshot-organization-cost.png") {
+                        self.dimWhenInactive = true
+                        self.showPreferences()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            do {
+                                try self.saveWindowSnapshot(self.preferencesWindow!, name: "screenshot-settings.png")
+                                print("Documentation screenshots saved to \(directory.path)")
+                                NSApp.terminate(nil)
+                            } catch { fatalError("Settings screenshot failed: \(error)") }
+                        }
+                    }
                 }
             } catch { fatalError("Overview screenshot failed: \(error)") }
+        }
+    }
+    private func captureCostScene(_ scene: String, path: String, name: String, completion: @escaping () -> Void) {
+        webView.evaluateJavaScript("window.showScene('\(scene)')") { _, error in
+            if let error = error { fatalError("Scene failed: \(error)") }
+            let script = """
+            if (!window.__atDocLocation) {
+              window.__atDocLocation = { hostname: 'www.perplexity.ai', pathname: '\(path)' };
+              window.__atDocCost = ActiveTaskCostDisplay.start({location: window.__atDocLocation});
+            } else {
+              window.__atDocLocation.pathname = '\(path)';
+            }
+            window.__atDocCost.refresh();
+            """
+            self.webView.evaluateJavaScript(script, in: nil, in: .defaultClient) { result in
+                if case .failure(let error) = result { fatalError("Cost fixture injection failed: \(error)") }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    self.webView.takeSnapshot(with: nil) { image, error in
+                        guard let image = image else { fatalError("Cost snapshot failed: \(String(describing: error))") }
+                        do {
+                            try self.saveWindowSnapshot(self.window, webImage: image, name: name)
+                            completion()
+                        } catch { fatalError("Cost screenshot failed: \(error)") }
+                    }
+                }
+            }
         }
     }
     #endif

@@ -11,14 +11,14 @@
     <a href="https://github.com/paulfxyz/perplexity-active-task/actions/workflows/build.yml"><img src="https://github.com/paulfxyz/perplexity-active-task/actions/workflows/build.yml/badge.svg" alt="Build and tests"></a>
   </p>
   <p><a href="https://github.com/paulfxyz/perplexity-active-task/releases/latest">Download for Mac</a> · <a href="INSTALL.md">Install guide</a> · <a href="CHANGELOG.md">Changelog</a> · <a href="PRIVACY.md">Privacy</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
-  <img src=".github/img/banner.svg" width="100%" alt="Active Task: keep your AI work in sight. A lightweight native macOS companion. Illustrated banner, not an app screenshot.">
+  <img src=".github/img/banner.png" width="100%" alt="Active Task: keep your AI work in sight. A lightweight native macOS companion. Illustrated banner, not an app screenshot.">
 </div>
 
 ## Your tasks, without the tab hunt
 
 Active Task is a tiny native Mac companion for [Perplexity Computer's active tasks](https://www.perplexity.ai/computer/tasks?status=active). It puts the existing website in a compact, resizable window, with the sidebar hidden where possible and a login session that survives relaunching.
 
-Keep it above your other windows, let it fade when you are working elsewhere, or use it like an ordinary window. No Electron runtime, API key, browser extension, account scraping, or project-operated backend is required.
+Keep it above your other windows, let it fade when you are working elsewhere, or use it like an ordinary window. It also adds clearly qualified USD equivalents to visible session usage and organization credits. No Electron runtime, API key, browser extension, or project-operated backend is required.
 
 It is a window onto Perplexity, not a second task engine. You still need a Perplexity account with access to Computer, and the app cannot add account features or bypass website restrictions.
 
@@ -48,6 +48,7 @@ The overview uses synthetic tasks in a separately compiled documentation build, 
 - **Persistent sign-in:** A dedicated local WebKit session, separate from Safari or Comet. There is no cookie import from another browser.
 - **A quieter sidebar:** Conservative, reversible suppression of known sidebar elements, with an explicit collapse-button fallback.
 - **Mac integration:** Menu-bar restore, native file saving, keyboard shortcuts, zoom, and sign-in popup windows.
+- **Cost context, inline:** A **Cost equivalent** row below Session usage and a dollar equivalent beside Available org credits, using the explicit net rate described below.
 - **Original artwork:** A mint activity waveform, connected neural nodes, and an AI sparkle. No copied Perplexity app icon.
 
 <div align="center">
@@ -66,12 +67,38 @@ Fresh installations default to floating on, dimming off, and 60% inactive opacit
 
 Dimming also works with floating off. The app does not make transparent areas click-through, keep your Mac awake, or guarantee visibility above system dialogs, other elevated windows, or across every full-screen/Spaces arrangement.
 
+## Credits are a unit. Dollars are context.
+
+The app uses the author's stated net purchase rate: **US$600 for 10,000 credits**, or **US$0.06 per credit**. This is an account-specific assumption built into this release, not Perplexity's official pricing or a universal tariff.
+
+| Display | What the equivalent means |
+| --- | --- |
+| Session usage → Cost equivalent | The displayed session credits used, multiplied by US$0.06 |
+| Available org credits → `(US$…)` | The equivalent of the remaining shared credit pool, not money spent or cash redeemable |
+
+For example, **218.77 credits → US$13.13**, and **10,000 available credits → US$600.00**. Original credit values remain unchanged; the additions follow readable DOM updates and disclose the rate on hover. Positive values below a cent show `<US$0.01`, not zero.
+
+<table>
+  <tr><th align="left">Session usage</th><th align="left">Organization pool</th></tr>
+  <tr>
+    <td><img src="docs/screenshot-session-cost.png" width="460" alt="Synthetic session fixture with 218.77 credits and the actual injected Cost equivalent row showing US$13.13"></td>
+    <td><img src="docs/screenshot-organization-cost.png" width="460" alt="Synthetic organization fixture with 10,000 available credits and the actual injected US$600.00 equivalent"></td>
+  </tr>
+</table>
+
+These are captures of the app's real display script acting on synthetic, native-structure fixtures, not a private account. English labels and explicit numeric values are supported; unreadable counts are unavailable, not assumed to be free, and compact values such as `10k` are not expanded into false precision.
+
+Use **View → Organization Usage** or **⌘2** to open the organization page. You need the appropriate account access; the app does not grant organization permissions.
+
+The calculation is local and adds no network requests. It is **not an invoice, cost forecast, live billing API, spending cap, or tax calculation**. If your purchase rate differs, the hard-coded assumption must be changed and the app rebuilt; see [cost calculation and limits](docs/COST_EQUIVALENT.md).
+
 ## Keyboard shortcuts
 
 | Shortcut | Action |
 | --- | --- |
 | ⌘, | Open settings |
 | ⌘1 | Return to active tasks |
+| ⌘2 | Open organization Usage |
 | ⌘R | Reload |
 | ⌘B | Open current page in the default browser |
 | ⌘+ / ⌘− / ⌘0 | Zoom in / out / reset |
@@ -85,14 +112,14 @@ Perplexity website in a persistent WKWebView
                     │
           Native resizable AppKit window
                     │
-    Floating + focus-aware opacity + sidebar controls
+    Floating + opacity + sidebar + local USD equivalents
                     │
        Local preferences and WebKit session
 ```
 
-The website handles your account and tasks. Active Task adds window behavior around it; it does not request API credentials, copy browser cookies, log page contents, or relay your task data through a separate service.
+The website handles your account and tasks. Active Task adds window behavior and locally converts the displayed credit counts; it does not request API credentials, copy browser cookies, log page contents, or relay your task data through a separate service.
 
-The sidebar script runs only on Perplexity's main frame in WebKit's isolated content world, without a JavaScript-to-native command bridge. Normal WebKit TLS and web-security behavior remain enabled. External HTTP(S) links open in your browser, and downloads ask where to save.
+Page-enhancement scripts run only on Perplexity's main frame in WebKit's isolated content world, without a JavaScript-to-native command bridge. Normal WebKit TLS and web-security behavior remain enabled. External HTTP(S) links open in your browser, and downloads ask where to save.
 
 “Local” does not mean offline: the embedded Perplexity website and its identity providers load their own resources. See [Privacy](PRIVACY.md), [Security](SECURITY.md), and the [architecture notes](docs/ARCHITECTURE.md).
 
@@ -102,12 +129,12 @@ The sidebar script runs only on Perplexity's main frame in WebKit's isolated con
 - **Browser login is separate:** Opening the same page in Safari or Comet does not sign the app in. Email verification links may open externally; return to the app and enter a code if available.
 - **Sidebar hiding is best-effort:** Perplexity can change its markup. The app deliberately does not hide generic navigation or guess at hashed CSS classes.
 - **Closing is not quitting:** Restore the window from the activity-wave menu-bar icon. Use Quit to stop the app.
-- **This is not an official integration:** There are no native task notifications, task-count badge, background-task API, automatic updates, or offline task sync.
+- **This is not an official integration:** There are no native task notifications, task-count badge, background-task or billing API, automatic updates, or offline task sync.
 - **Validation has limits:** CI builds both architectures, tests behavior, checks signing integrity, launches the app, and generates fixture screenshots. It does not establish live sign-in compatibility or account-specific sidebar behavior; see [validation notes](docs/VALIDATION.md).
 
 ## Develop and test
 
-Requires macOS 13+ and Apple's Xcode Command Line Tools to build. Node.js 22 is used for JavaScript tests; there are no npm or Swift-package dependencies.
+Requires macOS 13+ and Apple's Xcode Command Line Tools to build. The shipping app has no third-party runtime or Swift-package dependencies. Node.js 22 and the development-only jsdom package are used for JavaScript/DOM tests.
 
 ```sh
 git clone https://github.com/paulfxyz/perplexity-active-task.git
@@ -117,7 +144,8 @@ open "build/Active Task.app"
 ```
 
 ```sh
-node --test tests/sidebar.test.cjs
+npm ci
+npm test
 mkdir -p build
 xcrun swiftc Sources/Behavior.swift tests/WindowBehaviorTests.swift -o build/behavior-tests
 build/behavior-tests
@@ -126,6 +154,11 @@ build/behavior-tests
 The build creates a universal executable, generates the original icon using AppKit, ad-hoc signs and verifies the bundle, and produces a ZIP plus SHA-256 checksum. Screenshot fixtures are compiled into a separate documentation build only and are excluded from release bundles.
 
 Contributions, bug reports, and focused improvements are welcome. Start with [Contributing](CONTRIBUTING.md).
+
+## Companion projects
+
+- **[AI Credit Checker](https://github.com/paulfxyz/ai-credit-checker):** A separate menu-bar dashboard for available balances across AI and infrastructure providers.
+- **[Perplexity Cost Transparency](https://github.com/paulfxyz/pplx-cost-transparency):** The browser-extension inspiration for inline USD context. Active Task reuses its conservative parsing approach, but uses the new **US$600 net / 10,000 credits** assumption specified for this app.
 
 ## Open source, honestly
 

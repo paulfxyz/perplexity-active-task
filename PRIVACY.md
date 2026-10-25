@@ -1,6 +1,6 @@
 # Privacy
 
-Active Task is a native window around Perplexity's website. There is no project-operated backend, analytics SDK, telemetry integration, balance collector, or task-content export service in this app.
+Active Task is a native window around Perplexity's website, with local USD equivalents for displayed credits. There is no project-operated backend, analytics SDK, telemetry integration, remote balance collector, or task-content export service in this app.
 
 ## What stays on your Mac
 
@@ -9,6 +9,8 @@ Active Task is a native window around Perplexity's website. There is no project-
 - **Downloads:** Files are saved to the location you choose in the native Save dialog.
 
 The app does not import Safari or Comet cookies, request API keys, log page contents, or implement its own password collection. The local website store can contain sensitive account data; “local” does not mean separately encrypted by this application.
+
+Cost-display scripts read the visible session-credit or organization-credit text, calculate its equivalent at the disclosed rate, and add it to the same page. The scripts do not store those readings, intercept account APIs, send network requests, or build usage history.
 
 ## What goes over the network
 

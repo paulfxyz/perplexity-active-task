@@ -4,7 +4,7 @@ Active Task is a community utility, not independently security-certified softwar
 
 ## Design boundaries
 
-The app uses macOS's normal WebKit TLS and web-security behavior. Sidebar JavaScript is limited to Perplexity's main frame and runs in an isolated content world, with no JavaScript-to-native command bridge.
+The app uses macOS's normal WebKit TLS and web-security behavior. Sidebar and cost-display JavaScript are limited to Perplexity's main frame and run in an isolated content world, with no JavaScript-to-native command bridge.
 
 Top-level internal navigation is restricted to Perplexity and the identity-provider domains listed in the source. Other HTTP(S) links and mail links open externally; unknown custom schemes are not launched. This is not a network firewall: embedded website resources and subframes still follow normal WebKit rules.
 
