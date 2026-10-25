@@ -18,7 +18,7 @@ The updater:
 - **Controls networking:** Uses an ephemeral, cookieless client without stored URL credentials or cache. Every redirect must remain HTTPS on an explicit GitHub host.
 - **Verifies the download:** Compares the actual byte count and SHA-256 before extraction.
 - **Checks the archive:** Rejects traversal, unexpected roots, symlinks, and unsupported layouts before unpacking.
-- **Checks the app:** Requires `com.paulfleury.activetask`, the advertised version, an executable named `ActiveTask`, Apple silicon and Intel architectures, and a valid code-signature integrity check.
+- **Checks the app:** Requires `com.paulfleury.activetask`, the advertised version, a compatible minimum macOS version, an executable named `ActiveTask`, Apple silicon and Intel architectures, and a valid code-signature integrity check.
 - **Stages locally:** Creates a mode-0700 hidden sibling folder, copies the current app's helper there, and does not alter the installed app while it is running.
 - **Confirms the swap:** Waits for the old PID to exit, rechecks bundle identity/version and signature, obtains a local lock, moves the old app into backup, moves the candidate into place, and runs `open` on it.
 

@@ -154,6 +154,9 @@ npm test
 mkdir -p build
 xcrun swiftc Sources/Behavior.swift tests/WindowBehaviorTests.swift -o build/behavior-tests
 build/behavior-tests
+xcrun swiftc -swift-version 5 Sources/UpdateCore.swift Sources/UpdateHTTP.swift \
+  tests/UpdaterTests.swift -o build/updater-tests
+build/updater-tests
 ```
 
 The build creates a universal executable, generates the original icon using AppKit, ad-hoc signs and verifies the bundle, and produces a ZIP plus SHA-256 checksum. Screenshot fixtures are compiled into a separate documentation build only and are excluded from release bundles.

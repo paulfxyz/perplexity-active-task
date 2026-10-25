@@ -380,7 +380,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         updateStatusLabel?.stringValue = "Active Task \(version). \(updater.statusText)"
     }
 
-    @objc private func checkForUpdates() { updater.check(manual: true) }
+    @objc private func checkForUpdates() {
+        NSApp.activate(ignoringOtherApps: true)
+        updater.check(manual: true)
+    }
 
     @objc private func preferenceChanged(_ sender: NSControl) {
         switch sender.tag {

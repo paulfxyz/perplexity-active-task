@@ -8,8 +8,14 @@ struct UpdaterTests {
         checks += 1
         guard try value() else { throw UpdateFailure("TEST FAILED: \(label)") }
     }
-    static func rejects(_ label: String, _ body: () throws -> Void) throws {
-        do { try body() } catch { checks += 1; return }
+    static func rejects(_ label: String, containing expected: String? = nil, _ body: () throws -> Void) throws {
+        do { try body() } catch {
+            if let expected = expected, !error.localizedDescription.contains(expected) {
+                throw UpdateFailure("TEST FAILED: \(label) rejected for the wrong reason: \(error)")
+            }
+            checks += 1
+            return
+        }
         throw UpdateFailure("TEST FAILED: accepted \(label)")
     }
     static func metadata(tag: String = "v2.0.0", digest: String = "sha256:" + String(repeating: "a", count: 64),
@@ -59,6 +65,16 @@ struct UpdaterTests {
             value["prerelease"] = true
             _ = try UpdateCore.release(from: JSONSerialization.data(withJSONObject: value), currentVersion: "1.1.0")
         }
+        try rejects("draft") {
+            var value = try JSONSerialization.jsonObject(with: valid) as! [String: Any]
+            value["draft"] = true
+            _ = try UpdateCore.release(from: JSONSerialization.data(withJSONObject: value), currentVersion: "1.1.0")
+        }
+        for tag in ["2.0.0", "v2.0.0-beta", "v02.0.0"] {
+            try rejects("unsupported release tag") {
+                _ = try UpdateCore.release(from: metadata(tag: tag), currentVersion: "1.1.0")
+            }
+        }
         try UpdateCore.validateEntryNames(["Active Task.app/", "Active Task.app/Contents/Info.plist", "__MACOSX/._Active Task.app"])
         checks += 1
         for entry in ["/tmp/escape", "../escape", "Active Task.app/../escape", "Other.app/Contents/a",
@@ -66,6 +82,12 @@ struct UpdaterTests {
             try rejects("unsafe archive path") { try UpdateCore.validateEntryNames([entry]) }
         }
         try check(!UpdateCore.universalArchitectures(Data("not a Mach-O".utf8)), "bad executable")
+        let macOS = OperatingSystemVersion(majorVersion: 15, minorVersion: 1, patchVersion: 0)
+        try check(UpdateCore.supportsMinimumOS("13.0", current: macOS), "older supported OS")
+        try check(UpdateCore.supportsMinimumOS("15.1.0", current: macOS), "same supported OS")
+        try check(!UpdateCore.supportsMinimumOS("15.1.1", current: macOS), "newer OS refused")
+        try check(!UpdateCore.supportsMinimumOS("99.0", current: macOS), "future OS refused")
+        try check(!UpdateCore.supportsMinimumOS("invalid", current: macOS), "invalid OS refused")
         try nativeInstallerIntegration()
         print("\(checks) updater checks passed, including real native replacement/reopen and injected launch-failure rollback.")
     }
@@ -152,6 +174,23 @@ struct UpdaterTests {
         try check(try UpdateCore.readVersion(installed) == "2.0.0", "old app restored after launch failure")
         try check(manager.fileExists(atPath: rollback.stage.appendingPathComponent("Failed Active Task.app").path), "failed app retained")
         try check(!manager.fileExists(atPath: installed.deletingLastPathComponent().appendingPathComponent(".active-task-update-lock").path), "lock released")
+        let stale = try UpdateCore.prepare(archive: archive, version: "2.0.1", target: installed, helperSource: helper)
+        try rejects("target changed before helper preflight", containing: "Update failed; restoring the previous app.") {
+            try UpdateCore.run("/bin/bash", [stale.helper.path, "999999", installed.path, stale.candidate.path,
+                                            stale.stage.path, "1.1.0", stale.newVersion, "active-task-update-v1"])
+        }
+        try check(try UpdateCore.readVersion(installed) == "2.0.0", "late preflight leaves installed version intact")
+        try check(!manager.fileExists(atPath: stale.stage.appendingPathComponent("Previous Active Task.app").path),
+                  "late preflight does not move installed app")
+        let resource = candidate.appendingPathComponent("Contents/Resources")
+        try manager.createDirectory(at: resource, withIntermediateDirectories: true)
+        try manager.createSymbolicLink(at: resource.appendingPathComponent("unsafe-link"), withDestinationURL: marker)
+        let symlinkArchive = root.appendingPathComponent("symlink.zip")
+        try UpdateCore.run("/usr/bin/ditto", ["-c", "-k", "--keepParent", candidate.path, symlinkArchive.path])
+        try rejects("actual ZIP symlink", containing: "Symbolic links in the archive") {
+            _ = try UpdateCore.prepare(archive: symlinkArchive, version: "2.0.1", target: installed, helperSource: helper)
+        }
+        try check(try UpdateCore.readVersion(installed) == "2.0.0", "symlink archive leaves target intact")
     }
 
     static func liveProbe() async throws {

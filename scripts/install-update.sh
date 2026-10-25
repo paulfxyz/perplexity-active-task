@@ -28,12 +28,6 @@ if kill -0 "$PID" 2>/dev/null; then echo "Update cancelled: app did not quit."; 
 /bin/mkdir "$LOCK" || { echo "Another update holds the lock. No app was replaced."; exit 1; }
 cleanup() { /bin/rmdir "$LOCK" 2>/dev/null || true; }
 trap cleanup EXIT
-read_info() { /usr/libexec/PlistBuddy -c "Print :$2" "$1/Contents/Info.plist"; }
-[[ "$(read_info "$TARGET" CFBundleIdentifier)" == "com.paulfleury.activetask" ]] || exit 1
-[[ "$(read_info "$TARGET" CFBundleShortVersionString)" == "$OLD_VERSION" ]] || exit 1
-[[ "$(read_info "$CANDIDATE" CFBundleIdentifier)" == "com.paulfleury.activetask" ]] || exit 1
-[[ "$(read_info "$CANDIDATE" CFBundleShortVersionString)" == "$NEW_VERSION" ]] || exit 1
-/usr/bin/codesign --verify --deep --strict "$CANDIDATE"
 rollback() {
   trap - ERR INT TERM HUP
   echo "Update failed; restoring the previous app."
@@ -47,6 +41,12 @@ rollback() {
   exit 1
 }
 trap rollback ERR INT TERM HUP
+read_info() { /usr/libexec/PlistBuddy -c "Print :$2" "$1/Contents/Info.plist"; }
+[[ "$(read_info "$TARGET" CFBundleIdentifier)" == "com.paulfleury.activetask" ]]
+[[ "$(read_info "$TARGET" CFBundleShortVersionString)" == "$OLD_VERSION" ]]
+[[ "$(read_info "$CANDIDATE" CFBundleIdentifier)" == "com.paulfleury.activetask" ]]
+[[ "$(read_info "$CANDIDATE" CFBundleShortVersionString)" == "$NEW_VERSION" ]]
+/usr/bin/codesign --verify --deep --strict "$CANDIDATE"
 /bin/mv "$TARGET" "$BACKUP"
 /bin/mv "$CANDIDATE" "$TARGET"
 /usr/bin/open -n "$TARGET"

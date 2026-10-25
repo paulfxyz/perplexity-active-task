@@ -160,11 +160,30 @@ enum UpdateCore {
         return cpus.contains(0x0100000c) && cpus.contains(0x01000007)
     }
 
+    static func supportsMinimumOS(_ string: String, current: OperatingSystemVersion = ProcessInfo.processInfo.operatingSystemVersion) -> Bool {
+        let parts = string.split(separator: ".", omittingEmptySubsequences: false)
+        guard (2...3).contains(parts.count) else { return false }
+        var numbers: [Int] = []
+        for part in parts {
+            guard !part.isEmpty, part.allSatisfy({ $0.isASCII && $0.isNumber }),
+                  let number = Int(part) else { return false }
+            numbers.append(number)
+        }
+        while numbers.count < 3 { numbers.append(0) }
+        let available = [current.majorVersion, current.minorVersion, current.patchVersion]
+        return !available.lexicographicallyPrecedes(numbers)
+    }
+
     static func validateBundle(_ app: URL, version: String) throws {
         let manager = FileManager.default
         guard try app.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink != true,
               try readVersion(app) == version else {
             throw UpdateFailure("Unexpected update version or bundle path.")
+        }
+        let plistData = try Data(contentsOf: app.appendingPathComponent("Contents/Info.plist"))
+        guard let plist = try PropertyListSerialization.propertyList(from: plistData, format: nil) as? [String: Any],
+              let minimumOS = plist["LSMinimumSystemVersion"] as? String, supportsMinimumOS(minimumOS) else {
+            throw UpdateFailure("This release requires an unsupported macOS version.")
         }
         guard let enumerator = manager.enumerator(at: app, includingPropertiesForKeys: [.isSymbolicLinkKey]) else {
             throw UpdateFailure("Cannot inspect update bundle.")

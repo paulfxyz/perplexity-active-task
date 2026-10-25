@@ -12,6 +12,9 @@ npm test
 mkdir -p build
 xcrun swiftc Sources/Behavior.swift tests/WindowBehaviorTests.swift -o build/behavior-tests
 build/behavior-tests
+xcrun swiftc -swift-version 5 Sources/UpdateCore.swift Sources/UpdateHTTP.swift \
+  tests/UpdaterTests.swift -o build/updater-tests
+build/updater-tests
 bash scripts/build.sh
 ```
 
@@ -25,6 +28,7 @@ Run the real app to check keyboard behavior, settings, window focus, and frame r
 - **Keep estimates honest:** Read only explicitly labelled credits, preserve original values, disclose the rate, and distinguish session spending from available pool equivalents.
 - **Protect private data:** Use synthetic examples. Never commit browser state, passwords, API keys, private task titles, or signed-in screenshots without permission.
 - **Synchronize releases:** Keep `Info.plist`, changelog, release notes, and installation notes aligned. Tagging `vX.Y.Z` must match the bundle version.
+- **Keep updates unprivileged:** Preserve explicit installation approval, trusted hosts, integrity/identity/OS checks, path and symlink rejection, backup retention, and rollback. Do not bypass Gatekeeper or introduce production test hooks.
 - **Disclose AI assistance honestly:** AI-assisted contributions are welcome; contributors remain responsible for understanding and checking their changes.
 
 Contributions are licensed under this project's [MIT license](LICENSE). See [screenshot instructions](docs/SCREENSHOTS.md) for reproducible documentation images.

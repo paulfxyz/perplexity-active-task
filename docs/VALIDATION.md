@@ -15,7 +15,7 @@ The [GitHub Actions workflow](https://github.com/paulfxyz/perplexity-active-task
 - **Bundle checks:** Plist validation, generated icon presence, ad-hoc signature verification, and absence of the screenshot fixture from the shipping app.
 - **Launch smoke test:** Starts the native executable and verifies it remains alive for twelve seconds. This checks liveness, not UI correctness or login.
 - **Documentation capture:** A separately compiled native build renders synthetic tasks and captures its own overview, settings panel, session-cost row, and organization-cost suffix. The actual WebKit-injected values must equal `US$2.63` and `(US$120.00)` before capture succeeds.
-- **Native updater:** Semantic versions, URL/metadata/size/checksum policy, archive-name rejection, real signed universal fixture replacement/reopen, backup retention, and fault-injected immediate-launch rollback.
+- **Native updater:** Semantic versions, URL/metadata/size/checksum/OS policy, archive-name and actual ZIP-symlink rejection, real signed universal fixture replacement/reopen, late-preflight protection, backup retention, and fault-injected immediate-launch rollback.
 - **Live update probe:** Native public GitHub feed request, allowlisted redirects, actual ZIP size/hash verification, with no installation.
 - **Release integrity:** The tag must match the bundle version, and the ZIP must match its SHA-256 checksum before publication.
 
