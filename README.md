@@ -44,7 +44,7 @@ The script compiles optimized arm64 and x86_64 binaries, combines them into one 
 ```sh
 node --test tests/sidebar.test.cjs
 mkdir -p build
-xcrun swiftc Sources/Behavior.swift tests/behavior.swift -o build/behavior-tests
+xcrun swiftc Sources/Behavior.swift tests/WindowBehaviorTests.swift -o build/behavior-tests
 build/behavior-tests
 ```
 
