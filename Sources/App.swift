@@ -651,17 +651,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         }
     }
     private func saveStatusItemSnapshot() throws {
-        guard let directory = screenshotDirectory, let button = statusItem.button,
-              let bitmap = button.bitmapImageRepForCachingDisplay(in: button.bounds) else {
-            fatalError("Cannot capture native menu-bar button")
+        guard let directory = screenshotDirectory, let button = statusItem.button else {
+            fatalError("Cannot read native menu-bar button")
         }
-        button.cacheDisplay(in: button.bounds, to: bitmap)
-        let canvas = NSImage(size: NSSize(width: button.bounds.width + 48, height: button.bounds.height + 32))
-        canvas.lockFocus()
-        NSColor.windowBackgroundColor.setFill()
-        NSRect(origin: .zero, size: canvas.size).fill()
-        bitmap.draw(in: NSRect(x: 24, y: 16, width: button.bounds.width, height: button.bounds.height))
-        canvas.unlockFocus()
+        // WindowServer's status-item backing layer cannot be reliably captured
+        // on CI. Draw a labelled preview from the REAL native image/title/font.
+        // This is not a screenshot of the entire system menu bar.
+        let font = button.font ?? .monospacedDigitSystemFont(ofSize: 12, weight: .medium)
+        let title = button.title as NSString
+        let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: NSColor.labelColor]
+        let textSize = title.size(withAttributes: attributes)
+        let canvas = NSImage(size: NSSize(width: 68 + textSize.width.rounded(.up), height: 52))
+        let draw = {
+            canvas.lockFocus()
+            NSColor.windowBackgroundColor.setFill()
+            NSRect(origin: .zero, size: canvas.size).fill()
+            button.image?.draw(in: NSRect(x: 24, y: 18, width: 16, height: 16))
+            title.draw(at: NSPoint(x: 44, y: (52 - textSize.height) / 2), withAttributes: attributes)
+            canvas.unlockFocus()
+        }
+        if let appearance = NSAppearance(named: .aqua) {
+            appearance.performAsCurrentDrawingAppearance(draw)
+        } else { draw() }
         guard let tiff = canvas.tiffRepresentation,
               let data = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) else {
             fatalError("Cannot encode menu-bar snapshot")

@@ -9,7 +9,7 @@ Repository images must not expose real tasks, account information, sign-in sessi
 - **Session cost:** A synthetic Session usage row with 218.77 credits; the actual injected script adds `Cost equivalent` and `US$2.63`.
 - **Organization cost:** A synthetic Available org credits card with 10,000 credits; the actual injected script adds `(US$120.00)` and ignores unrelated spend totals.
 - **Banner:** Original vector illustration in `.github/img/banner.svg`, rendered to `.github/img/banner.png` for consistent README display. It is not a screenshot.
-- **Menu-bar control:** The actual native status button after a four-session fixture is read by the real background WebKit/native counter. The control capture has neutral padding and is not a screenshot of the entire macOS menu bar.
+- **Menu-bar preview:** An AppKit rendering using the actual native status button's image, title, and font after a four-session fixture is read by the real background WebKit/native counter. WindowServer backing-layer capture is unreliable on CI, so this padded light-appearance preview is not a raw screenshot of the system menu bar.
 
 To avoid requiring Screen Recording permission on CI, the harness snapshots the native window frame and composites an actual `WKWebView.takeSnapshot` image into its corresponding content rectangle. It is a documentation capture, not evidence that sign-in or live task rendering passed.
 

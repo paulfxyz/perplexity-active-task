@@ -19,7 +19,7 @@ The [GitHub Actions workflow](https://github.com/paulfxyz/perplexity-active-task
 - **Documentation capture:** A separately compiled native build renders synthetic tasks and captures its own overview, settings panel, session-cost row, and organization-cost suffix. The actual WebKit-injected values must equal `US$2.63` and `(US$120.00)` before capture succeeds.
 - **Native updater:** Semantic versions, URL/metadata/size/checksum/OS policy, archive-name and actual ZIP-symlink rejection, real signed universal fixture replacement/reopen, late-preflight protection, backup retention, and fault-injected immediate-launch rollback.
 - **Live update probe:** Native public GitHub feed request, allowlisted redirects, actual ZIP size/hash verification, with no installation.
-- **Native background counter:** The actual hidden WKWebView must read a four-session fixture and update the actual NSStatusBar button to `4` before its control snapshot is captured.
+- **Native background counter:** The actual hidden WKWebView must read a four-session fixture and update the actual NSStatusBar button to `4` before an AppKit preview is rendered from its native properties. This is not a WindowServer/system-menu-bar screenshot.
 - **Release integrity:** The tag must match the bundle version, and the ZIP must match its SHA-256 checksum before publication.
 
 For the result of a particular version, inspect that tag's workflow run rather than assuming a green badge proves every platform interaction.
