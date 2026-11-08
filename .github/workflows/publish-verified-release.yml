@@ -1,0 +1,82 @@
+name: Publish verified release artifact
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing stable version tag
+        required: true
+        type: string
+      source_run_id:
+        description: Successful same-repository, same-tag-commit build run
+        required: true
+        type: string
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: ${{ inputs.tag }}
+      SOURCE_RUN: ${{ inputs.source_run_id }}
+    steps:
+      - name: Verify successful source build and exact tag commit
+        run: |
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          [[ "$SOURCE_RUN" =~ ^[0-9]+$ ]]
+          python - <<'PY'
+          import json,os,subprocess
+          repo=os.environ["GITHUB_REPOSITORY"]
+          run=json.loads(subprocess.check_output(["gh","api",f"repos/{repo}/actions/runs/{os.environ['SOURCE_RUN']}"]))
+          tag=json.loads(subprocess.check_output(["gh","api",f"repos/{repo}/git/ref/tags/{os.environ['RELEASE_TAG']}"]))
+          assert run["conclusion"]=="success" and run["status"]=="completed"
+          assert run["head_repository"]["full_name"]==repo
+          assert tag["object"]["type"]=="commit" and run["head_sha"]==tag["object"]["sha"]
+          print("Successful source run matches the exact stable tag commit.")
+          PY
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: Active-Task-macOS-universal
+          path: dist
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.source_run_id }}
+      - name: Verify version and archive checksum
+        run: |
+          (cd dist && sha256sum -c SHA256SUMS.txt)
+          python - <<'PY'
+          import os,plistlib,zipfile
+          expected=os.environ["RELEASE_TAG"][1:]
+          with zipfile.ZipFile("dist/Active-Task-macOS-universal.zip") as archive:
+            info=plistlib.loads(archive.read("Active Task.app/Contents/Info.plist"))
+          assert info["CFBundleShortVersionString"]==expected
+          assert info["CFBundleIdentifier"]=="com.paulfleury.activetask"
+          with open("Resources/Info.plist","rb") as file: source=plistlib.load(file)
+          assert source["CFBundleShortVersionString"]==expected
+          print("Source and artifact bundle versions match the stable tag.")
+          PY
+      - name: Fill only the empty draft and publish
+        run: |
+          gh release view "$RELEASE_TAG" --json isDraft,assets > existing-release.json
+          python - <<'PY'
+          import json
+          data=json.load(open("existing-release.json"))
+          assert data["isDraft"] is True, "Refusing to alter a published release."
+          assert data["assets"]==[], "Existing draft assets require inspection; nothing is overwritten."
+          PY
+          gh release upload "$RELEASE_TAG" dist/Active-Task-macOS-universal.zip dist/SHA256SUMS.txt dist/icon-1024.png
+          python - <<'PY'
+          import hashlib,json,os,subprocess
+          assets=json.loads(subprocess.check_output(["gh","release","view",os.environ["RELEASE_TAG"],"--json","assets"]))["assets"]
+          by_name={asset["name"]:asset for asset in assets}
+          for name in ["Active-Task-macOS-universal.zip","SHA256SUMS.txt","icon-1024.png"]:
+            data=open("dist/"+name,"rb").read()
+            assert by_name[name]["size"]==len(data)
+            assert by_name[name]["digest"]=="sha256:"+hashlib.sha256(data).hexdigest()
+          print("Uploaded asset digests and sizes match the verified build.")
+          PY
+          gh release edit "$RELEASE_TAG" --draft=false --latest

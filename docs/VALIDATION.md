@@ -18,11 +18,13 @@ The [GitHub Actions workflow](https://github.com/paulfxyz/perplexity-active-task
 - **Launch smoke test:** Starts the native executable and verifies it remains alive for twelve seconds. This checks liveness, not UI correctness or login.
 - **Documentation capture:** A separately compiled native build renders synthetic tasks and captures its own overview, settings panel, session-cost row, and organization-cost suffix. The actual WebKit-injected values must equal `US$2.63` and `(US$120.00)` before capture succeeds.
 - **Native updater:** Semantic versions, URL/metadata/size/checksum/OS policy, archive-name and actual ZIP-symlink rejection, real signed universal fixture replacement/reopen, late-preflight protection, backup retention, and fault-injected immediate-launch rollback.
-- **Live update probe:** Native public GitHub feed request, allowlisted redirects, actual ZIP size/hash verification, with no installation.
+- **Live update probe:** Native public GitHub feed request, allowlisted redirects, actual ZIP size/hash verification, with no installation. An external HTTP 403 is recorded as a warning rather than blocking otherwise valid builds; other probe failures still fail CI.
 - **Native background counter:** The actual hidden WKWebView must read a four-session fixture and update the actual NSStatusBar button to `4` before an AppKit preview is rendered from its native properties. This is not a WindowServer/system-menu-bar screenshot.
 - **Release integrity:** The tag must match the bundle version, and the ZIP must match its SHA-256 checksum before publication.
 
 For the result of a particular version, inspect that tag's workflow run rather than assuming a green badge proves every platform interaction.
+
+The 2.1.0 source commit passed the full [main build](https://github.com/paulfxyz/perplexity-active-task/actions/runs/42511425951), including the live probe and background counter. Its tag runner's anonymous live probe returned HTTP 403 on two attempts. The release recovery workflow therefore verifies a successful build's exact tag commit, archive checksum and version, fills only an empty existing draft, checks uploaded asset digests, and publishes without replacing or rebuilding the verified app.
 
 ## Real-Mac acceptance checklist
 
