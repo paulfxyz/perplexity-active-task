@@ -65,6 +65,12 @@ Fresh installations default to floating on, dimming off, and 60% inactive opacit
 
 Starting in **2.1.0**, the menu-bar icon has a compact, monospaced active-session count next to it. Three pinned sessions and one other active session display **4**; multi-digit totals expand naturally rather than being truncated.
 
+<div align="center">
+  <img src="docs/screenshot-menu-bar.png" width="160" alt="AppKit preview of the native activity icon followed by the active-task count 4">
+</div>
+
+This padded AppKit preview uses the actual status button's image, title, and font after the four-session fixture updates it. It is not a screenshot of the entire macOS menu bar or a live account.
+
 The count uses a separate background dashboard view with the app's existing login, not another browser's cookies or a private account API. It reads the active list about every five seconds and refreshes that page about once a minute, independently of your foreground page or window visibility.
 
 - **0:** A recognized, loaded empty active list.
