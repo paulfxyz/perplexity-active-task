@@ -11,6 +11,9 @@ Active Task is one small AppKit application with a WKWebView. It has no third-pa
 | `Sources/Sidebar.js` | Main-frame-only, isolated-world, reversible sidebar suppression |
 | `Sources/Cost.js` | Strict credit parsing and the disclosed net-rate calculation |
 | `Sources/CostDisplay.js` | Route-scoped live session and organization cost additions |
+| `Sources/TaskCount.js` | Semantic active-dashboard aggregate reader and background group expansion |
+| `Sources/TaskCountState.swift` | Bounded count decoding and fresh/stale/unknown menu-bar presentation |
+| `Sources/TaskCounter.swift` | Same-login background WKWebView, native polling, refresh and lifecycle |
 | `Sources/UpdateCore.swift` | Strict version/release policy, SHA-256, archive and bundle validation |
 | `Sources/UpdateHTTP.swift` | Bounded ephemeral downloads with explicit redirect allowlist |
 | `Sources/UpdateController.swift` | Native update UI, optional checks, preparation, and restart approval |
@@ -49,3 +52,9 @@ The release build omits the fixture resource and screenshot-only branches. CI ch
 The updater is native and separate from WebKit. It never shares Perplexity cookies or account content with its GitHub client. Checks are optional; replacement requires explicit confirmation, a newer stable version, trusted transport, matching size/hash, and a validated bundle.
 
 The current helper is copied to a private sibling stage before the app quits. It waits for the old process, retains the old bundle, swaps in the verified candidate, and reopens it. See [Updates](UPDATES.md) for the trust model and recovery limits.
+
+## Menu-bar count
+
+The status item uses variable width, a leading activity image, and a monospaced-digit title. A separate background WebKit view, sharing only the app's normal website store and process pool, follows the canonical active list rather than the user's current page.
+
+Polling returns a bounded aggregate result through native evaluation in an isolated content world, not a JavaScript message bridge. Revision guards discard results from superseded navigations; failure and freshness handling prevent missing data from becoming a false zero. See [Task count](TASK_COUNT.md).

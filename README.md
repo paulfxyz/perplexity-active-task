@@ -28,7 +28,7 @@ It is a window onto Perplexity, not a second task engine. You still need a Perpl
 2. Unzip it, move **Active Task.app** to Applications, and open it.
 3. Sign in directly inside the app. Use the sliders button or **Active Task → Settings…** to choose your window behavior.
 
-Upgrading from 1.x? Install **2.0.0 manually once**: older versions do not contain the new updater. Quit the app, replace it, and reopen. The bundle identifier stays the same, so preferences and the app's WebKit session remain associated with the same application.
+Upgrading from 1.x? Install the **latest release manually once**: older versions do not contain the updater. Quit the app, replace it, and reopen. The bundle identifier stays the same, so preferences and the app's WebKit session remain associated with the same application.
 
 From 2.0.0 onward, use **Active Task → Check for Updates…** or the button in Settings. Optional automatic checks run after launch and every six hours, but installation always requires **Download & Restart** confirmation. Updates are downloaded, verified, staged, and installed in place; the previous app is retained for recovery. See [the update process and its limits](docs/UPDATES.md).
 
@@ -50,6 +50,7 @@ The overview uses synthetic tasks in a separately compiled documentation build, 
 - **Persistent sign-in:** A dedicated local WebKit session, separate from Safari or Comet. There is no cookie import from another browser.
 - **A quieter sidebar:** Conservative, reversible suppression of known sidebar elements, with an explicit collapse-button fallback.
 - **Mac integration:** Menu-bar restore, native file saving, keyboard shortcuts, zoom, and sign-in popup windows.
+- **Live menu-bar count:** A number beside the activity icon shows the small active dashboard's total, including pinned sessions. It keeps refreshing when the window is closed or you are viewing a different page.
 - **Cost context, inline:** A **Cost equivalent** row below Session usage and a dollar equivalent beside Available org credits, using the explicit net rate described below.
 - **In-app updates:** A version check, download progress, verified replacement/restart, optional background checks, and a previous-app backup. No silent installations or administrator prompts.
 - **Original artwork:** A mint activity waveform, connected neural nodes, and an AI sparkle. No copied Perplexity app icon.
@@ -59,6 +60,18 @@ The overview uses synthetic tasks in a separately compiled documentation build, 
 </div>
 
 Fresh installations default to floating on, dimming off, and 60% inactive opacity when enabled. Settings changes apply immediately; opening Settings takes focus away from the task window, so dimming can become visible while you adjust it.
+
+## Your active work, at a glance
+
+Starting in **2.1.0**, the menu-bar icon has a compact, monospaced active-session count next to it. Three pinned sessions and one other active session display **4**; multi-digit totals expand naturally rather than being truncated.
+
+The count uses a separate background dashboard view with the app's existing login, not another browser's cookies or a private account API. It reads the active list about every five seconds and refreshes that page about once a minute, independently of your foreground page or window visibility.
+
+- **0:** A recognized, loaded empty active list.
+- **…:** Loading, sign-in needed, offline, stale, filtered, or unsupported markup. Unknown is never assumed to be zero.
+- **N+:** At least N loaded sessions when pagination is detected or the loaded list reaches 50; it is not an authoritative backend total.
+
+Use **Refresh Task Count** from the menu-bar menu for a fresh page load. This is a DOM-based companion, so website changes, network delays, App Nap, pagination, and virtualization can affect availability or freshness; see [the counter's behavior and limits](docs/TASK_COUNT.md).
 
 ## Three ways to keep it nearby
 
@@ -134,7 +147,7 @@ Page-enhancement scripts run only on Perplexity's main frame in WebKit's isolate
 - **Browser login is separate:** Opening the same page in Safari or Comet does not sign the app in. Email verification links may open externally; return to the app and enter a code if available.
 - **Sidebar hiding is best-effort:** Perplexity can change its markup. The app deliberately does not hide generic navigation or guess at hashed CSS classes.
 - **Closing is not quitting:** Restore the window from the activity-wave menu-bar icon. Use Quit to stop the app.
-- **This is not an official integration:** There are no native task notifications, task-count badge, background-task or billing API, unattended installations, or offline task sync.
+- **This is not an official integration:** There are no native task notifications, background-task or billing API, unattended installations, or offline task sync.
 - **Validation has limits:** CI builds both architectures, tests behavior, checks signing integrity, launches the app, and generates fixture screenshots. It does not establish live sign-in compatibility or account-specific sidebar behavior; see [validation notes](docs/VALIDATION.md).
 
 ## Develop and test
@@ -154,6 +167,8 @@ npm test
 mkdir -p build
 xcrun swiftc Sources/Behavior.swift tests/WindowBehaviorTests.swift -o build/behavior-tests
 build/behavior-tests
+xcrun swiftc Sources/TaskCountState.swift tests/TaskCountStateTests.swift -o build/task-count-tests
+build/task-count-tests
 xcrun swiftc -swift-version 5 Sources/UpdateCore.swift Sources/UpdateHTTP.swift \
   tests/UpdaterTests.swift -o build/updater-tests
 build/updater-tests

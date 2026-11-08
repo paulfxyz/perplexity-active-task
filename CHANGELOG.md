@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.1.0 · 2026-11-08
+
+- Added a live active-session count beside the menu-bar activity icon.
+- Count pinned and ordinary active dashboard rows together; ignore sidebar links, headers, hidden clones, and loading placeholders.
+- Added a same-login background dashboard so the count refreshes while the main window is closed or displaying a task or organization Usage.
+- Read the DOM about every five seconds and revalidate the background page about every minute; add a manual Refresh Task Count action.
+- Show multi-digit numbers without truncation, genuine empty-state zero, an ellipsis for unknown/unavailable/stale states, and a lower-bound `+` for detected/large pagination.
+- Added DOM, native validation/presentation, live-page reader, and background-WebKit-to-native-status-button fixture checks, plus a menu-bar control screenshot.
+- Preserve the corrected US$0.012 cost rate, existing in-app updater, sign-in store, opacity choices, and window behavior.
+
 ## 2.0.0 · 2026-10-25
 
 - Corrected net cost to **US$0.012 per credit**, consistent with 10,000/US$120, 50,000/US$600, and 100,000/US$1,200.

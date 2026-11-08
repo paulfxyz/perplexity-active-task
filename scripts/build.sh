@@ -18,6 +18,7 @@ for ARCH in arm64 x86_64; do
   cp Sources/App.swift "$OUT/main.swift"
   xcrun swiftc -swift-version 5 "${FLAGS[@]}" -sdk "$SDK" -target "$ARCH-apple-macos13.0" \
     -framework AppKit -framework WebKit -framework CryptoKit Sources/Behavior.swift \
+    Sources/TaskCountState.swift Sources/TaskCounter.swift \
     Sources/UpdateCore.swift Sources/UpdateHTTP.swift Sources/UpdateController.swift "$OUT/main.swift" \
     -o "$OUT/ActiveTask-$ARCH"
 done
@@ -25,6 +26,7 @@ lipo -create "$OUT/ActiveTask-arm64" "$OUT/ActiveTask-x86_64" -output "$APP/Cont
 cp Resources/Info.plist "$APP/Contents/Info.plist"
 cp Sources/Sidebar.js "$APP/Contents/Resources/Sidebar.js"
 cp Sources/Cost.js Sources/CostDisplay.js "$APP/Contents/Resources/"
+cp Sources/TaskCount.js "$APP/Contents/Resources/TaskCount.js"
 cp LICENSE "$APP/Contents/Resources/LICENSE.txt"
 cp scripts/install-update.sh "$APP/Contents/Resources/InstallUpdate.sh"
 if [[ "${SCREENSHOT_BUILD:-0}" == "1" ]]; then

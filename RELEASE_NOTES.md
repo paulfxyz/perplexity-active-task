@@ -1,33 +1,21 @@
-# Active Task 2.0.0
+# Active Task 2.1.0
 
-Correct credit math, plus confirmed in-app updates.
+Your active-session count, right beside the menu-bar icon.
 
-## Corrected cost equivalents
+## What's new
 
-The clarified packs are **10,000 credits for US$120**, **50,000 for US$600**, and **100,000 for US$1,200**. All mean **US$0.012 per credit**.
+- **A live number:** Three pinned sessions plus one other active session display **4**. Counts are not hard-coded, and multiple digits fit naturally.
+- **Independent refresh:** A background dashboard uses the app's existing login, even when the main window is closed or you are inside a task or Usage page.
+- **Honest states:** Confirmed empty lists show **0**; loading, authentication, network, unsupported, or stale states show **…**, not a false zero.
+- **Manual refresh:** Use **Refresh Task Count** in the menu-bar menu. The reader polls about every five seconds and revalidates the page about once a minute while the app is running.
+- **Large-list limits:** Detected pagination or at least 50 loaded rows adds `+`; this is a DOM count, not an official backend task-total API.
 
-Version 1.1.0 used US$0.06 and overstated the equivalent fivefold under those packs. Version 2.0.0 fixes both Session usage and available organization credits, derives the hover rate from the calculator constants, and adds regression tests for all packs and reported readings.
+The corrected **US$0.012 per credit** rate, all eleven opacity choices, login store, and verified in-app updater are unchanged.
 
-- 11,688.38 credits → **US$140.26**
-- 11,717.13 credits → **US$140.61**
-- 50,000 credits → **US$600.00**
+## Update
 
-This changes only the displayed estimate. Original Perplexity credit values and billing are untouched.
+From **2.0.0**, use **Active Task > Check for Updates…**, then approve **Download & Restart**. From 1.x, or for a first install, download `Active-Task-macOS-universal.zip`, quit the old app, unzip, and replace **Active Task.app** in Applications.
 
-## In-app updates
+Universal Apple silicon/Intel build for macOS 13+. The community build remains ad-hoc signed, **not Apple-notarized**; it does not bypass Gatekeeper or request administrator access.
 
-- **Check for Updates…** in the application menu, menu-bar menu, sliders menu, and Settings.
-- Current version/status in Settings, with optional launch and six-hour automatic checks.
-- Explicit **Download & Restart** confirmation; no silent installation.
-- Trusted GitHub redirects, bounded downloads, SHA-256 and size checks, archive checks, bundle/version/architecture validation, and code-signature integrity verification.
-- Unprivileged in-place replacement and reopen, previous-app backup, and rollback on immediate replacement/open-command failures.
-
-See [the full update process and trust limits](https://github.com/paulfxyz/perplexity-active-task/blob/main/docs/UPDATES.md).
-
-## Install this release
-
-**From 1.x, install 2.0.0 manually once.** Quit the old app, download and unzip `Active-Task-macOS-universal.zip`, replace the app in Applications, and reopen. The bundle identifier is unchanged; the application continues using its local preferences and WebKit store.
-
-The universal app supports macOS 13+ on Apple silicon and Intel. It remains ad-hoc signed, **not Apple-notarized**; macOS or managed-device policies may require approval or prevent installation. The updater does not bypass Gatekeeper or request administrator access.
-
-Live login and DOM-label acceptance remain separate from automated native tests and synthetic screenshots. Estimates use the stated net rate, not a live billing API or invoice.
+The counter reads the English active dashboard's known semantic structure. Website changes, login, network conditions, pagination/virtualization, and App Nap can affect its availability or freshness. See [task-count details](https://github.com/paulfxyz/perplexity-active-task/blob/main/docs/TASK_COUNT.md) and [validation notes](https://github.com/paulfxyz/perplexity-active-task/blob/main/docs/VALIDATION.md).

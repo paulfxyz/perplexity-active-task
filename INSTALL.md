@@ -1,6 +1,6 @@
 # Install Active Task
 
-Active Task 2.0.0 supports macOS 13 or later on Apple silicon and Intel. Download the universal ZIP from [GitHub Releases](https://github.com/paulfxyz/perplexity-active-task/releases/latest); there is no privileged installer package.
+Active Task 2.1.0 supports macOS 13 or later on Apple silicon and Intel. Download the universal ZIP from [GitHub Releases](https://github.com/paulfxyz/perplexity-active-task/releases/latest); there is no privileged installer package.
 
 ## First installation
 
@@ -25,7 +25,7 @@ This checks that your file matches that release's checksum; it does not substitu
 
 Quit Active Task using ⌘Q, replace the app in Applications, and reopen. Keep the same application name and bundle identifier, `com.paulfleury.activetask`; the app continues using the associated preferences and WebKit data store.
 
-This one-time manual installation is required because 1.x does not include an updater. Version 2.0.0 also corrects 1.1.0's fivefold-overstated dollar equivalents: the clarified purchase packs imply **US$0.012 per credit**, not US$0.06.
+This one-time manual installation is required because 1.x does not include an updater. Versions 2.0.0 and later also correct 1.1.0's fivefold-overstated dollar equivalents: the clarified purchase packs imply **US$0.012 per credit**, not US$0.06.
 
 The 1.1.0 opacity menu is exactly 5%, 10%, 20%, 30%, 40%, 50%, 60%, 70%, 80%, 90%, and 95%. Older values migrate to the nearest supported level, with ties choosing the lower one: 65% becomes 60%, and 35% becomes 30%. Dimming remains disabled if it was disabled before the update.
 
@@ -40,6 +40,14 @@ Automatic checks are enabled by default after launch and every six hours; turn t
 The application must be named `Active Task.app` and located in a writable folder. Mounted volumes, App Translocation, symlinked app bundles, unsupported archives, and non-writable folders are refused without requesting administrator rights. Move the app to a suitable Applications folder or update manually instead.
 
 The previous app and local log are retained in a hidden `.active-task-update-<UUID>` sibling folder. Immediate replacement or launch-command errors trigger rollback; later crashes or website login failures are not automatically detected. See [updates and manual recovery](docs/UPDATES.md).
+
+## Menu-bar count in 2.1.0
+
+After signing in, the activity icon gains an active-session number. It includes pinned and ordinary active sessions and updates independently of the foreground page, with a roughly minute-level background page refresh.
+
+An ellipsis means unavailable or loading, not zero. Use **Refresh Task Count** from the menu-bar menu if necessary; if login has expired, sign in in the normal app window. A `+` after a count means a lower bound rather than an exact large/paginated total.
+
+No additional permissions, account keys, browser-cookie import, or setup are required. See [Task count](docs/TASK_COUNT.md) for freshness and website-compatibility limits.
 
 ## Sign-in troubleshooting
 

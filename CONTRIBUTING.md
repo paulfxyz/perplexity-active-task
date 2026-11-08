@@ -12,6 +12,8 @@ npm test
 mkdir -p build
 xcrun swiftc Sources/Behavior.swift tests/WindowBehaviorTests.swift -o build/behavior-tests
 build/behavior-tests
+xcrun swiftc Sources/TaskCountState.swift tests/TaskCountStateTests.swift -o build/task-count-tests
+build/task-count-tests
 xcrun swiftc -swift-version 5 Sources/UpdateCore.swift Sources/UpdateHTTP.swift \
   tests/UpdaterTests.swift -o build/updater-tests
 build/updater-tests
@@ -26,6 +28,7 @@ Run the real app to check keyboard behavior, settings, window focus, and frame r
 - **Preserve native behavior:** Floating and inactive dimming are independent, with full opacity restored on focus.
 - **Respect website boundaries:** No cookie import, undocumented credential extraction, provider-policy bypass, private API probing, or broad navigation-hiding rules.
 - **Keep estimates honest:** Read only explicitly labelled credits, preserve original values, disclose the rate, and distinguish session spending from available pool equivalents.
+- **Keep counts honest:** Do not count sidebar links, collapsed/filtered subsets, or loading placeholders as an exact global total. Preserve zero versus unknown, large-list qualifications, and the separate same-login background view.
 - **Protect private data:** Use synthetic examples. Never commit browser state, passwords, API keys, private task titles, or signed-in screenshots without permission.
 - **Synchronize releases:** Keep `Info.plist`, changelog, release notes, and installation notes aligned. Tagging `vX.Y.Z` must match the bundle version.
 - **Keep updates unprivileged:** Preserve explicit installation approval, trusted hosts, integrity/identity/OS checks, path and symlink rejection, backup retention, and rollback. Do not bypass Gatekeeper or introduce production test hooks.

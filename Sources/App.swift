@@ -15,6 +15,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
     private var window: NSWindow!
     private var webView: WKWebView!
     private var statusItem: NSStatusItem!
+    private var taskCounter: TaskCounter!
+    private var countMenuItem: NSMenuItem?
     private var popups: [NSWindow] = []
     private var settingsButton: NSButton!
     private var progress: NSProgressIndicator!
@@ -52,6 +54,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         buildMenu()
         buildWindow()
         buildStatusItem()
+        taskCounter = TaskCounter(primary: webView) { [weak self] presentation in self?.applyTaskCount(presentation) }
         showWindow(nil)
         #if SCREENSHOT_BUILD
         if let index = CommandLine.arguments.firstIndex(of: "--screenshots"),
@@ -67,6 +70,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         webView.load(URLRequest(url: homeURL))
         #if !SCREENSHOT_BUILD
         updater.start()
+        taskCounter.start()
         #endif
     }
 
@@ -232,10 +236,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
     }
 
     private func buildStatusItem() {
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         statusItem.button?.image = NSImage(systemSymbolName: "waveform.path", accessibilityDescription: "Active Task")
-        statusItem.button?.toolTip = "Active Task"
+        statusItem.button?.imagePosition = .imageLeading
+        statusItem.button?.font = .monospacedDigitSystemFont(ofSize: 12, weight: .medium)
         let menu = NSMenu()
+        let count = NSMenuItem(title: "Active tasks: unavailable", action: nil, keyEquivalent: "")
+        count.isEnabled = false
+        countMenuItem = count
+        menu.addItem(count)
+        addAction("Refresh Task Count", #selector(refreshTaskCount), to: menu)
+        menu.addItem(.separator())
         addAction("Show Active Task", #selector(showWindow(_:)), to: menu)
         addAction("Active tasks", #selector(goHome), to: menu)
         addAction("Organization Usage", #selector(goOrganization), to: menu)
@@ -244,7 +255,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         addAction("Quit Active Task", #selector(NSApplication.terminate(_:)), to: menu)
         menu.items.last?.target = NSApp
         statusItem.menu = menu
+        applyTaskCount(TaskCountPresentation(sample: TaskCountSample(unknown: "loading"), observedAt: nil))
     }
+
+    private func applyTaskCount(_ presentation: TaskCountPresentation) {
+        statusItem.button?.title = presentation.title
+        statusItem.button?.toolTip = presentation.tooltip
+        statusItem.button?.setAccessibilityLabel("Active Task. \(presentation.summary)")
+        countMenuItem?.title = presentation.summary
+    }
+    @objc private func refreshTaskCount() { taskCounter.refresh() }
 
     @objc private func showSettings(_ sender: NSButton) {
         let menu = NSMenu()
@@ -484,6 +504,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         guard webView === self.webView else { return }
         progress?.stopAnimation(nil)
         updateSidebar()
+        #if !SCREENSHOT_BUILD
+        taskCounter.primaryPageDidFinish()
+        #endif
         #if SCREENSHOT_BUILD
         if screenshotDirectory != nil {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) { self.captureDocumentationScreenshots() }
@@ -615,6 +638,38 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         guard let directory = screenshotDirectory else { return }
         do { try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true) }
         catch { fatalError("Cannot create screenshots directory: \(error)") }
+        guard let fixture = Bundle.main.url(forResource: "ScreenshotFixture", withExtension: "html") else {
+            fatalError("Counter fixture missing")
+        }
+        taskCounter.startDocumentationFixture(fixture) {
+            guard self.statusItem.button?.title == " 4" else { fatalError("Native status button did not display 4") }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                do { try self.saveStatusItemSnapshot() }
+                catch { fatalError("Menu-bar snapshot failed: \(error)") }
+                self.captureMainDocumentationScreenshots()
+            }
+        }
+    }
+    private func saveStatusItemSnapshot() throws {
+        guard let directory = screenshotDirectory, let button = statusItem.button,
+              let bitmap = button.bitmapImageRepForCachingDisplay(in: button.bounds) else {
+            fatalError("Cannot capture native menu-bar button")
+        }
+        button.cacheDisplay(in: button.bounds, to: bitmap)
+        let canvas = NSImage(size: NSSize(width: button.bounds.width + 48, height: button.bounds.height + 32))
+        canvas.lockFocus()
+        NSColor.windowBackgroundColor.setFill()
+        NSRect(origin: .zero, size: canvas.size).fill()
+        bitmap.draw(in: NSRect(x: 24, y: 16, width: button.bounds.width, height: button.bounds.height))
+        canvas.unlockFocus()
+        guard let tiff = canvas.tiffRepresentation,
+              let data = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) else {
+            fatalError("Cannot encode menu-bar snapshot")
+        }
+        try data.write(to: directory.appendingPathComponent("screenshot-menu-bar.png"))
+    }
+    private func captureMainDocumentationScreenshots() {
+        guard let directory = screenshotDirectory else { return }
         webView.takeSnapshot(with: nil) { image, error in
             guard let image = image else { fatalError("WebKit snapshot failed: \(String(describing: error))") }
             do {

@@ -9,6 +9,7 @@ Repository images must not expose real tasks, account information, sign-in sessi
 - **Session cost:** A synthetic Session usage row with 218.77 credits; the actual injected script adds `Cost equivalent` and `US$2.63`.
 - **Organization cost:** A synthetic Available org credits card with 10,000 credits; the actual injected script adds `(US$120.00)` and ignores unrelated spend totals.
 - **Banner:** Original vector illustration in `.github/img/banner.svg`, rendered to `.github/img/banner.png` for consistent README display. It is not a screenshot.
+- **Menu-bar control:** The actual native status button after a four-session fixture is read by the real background WebKit/native counter. The control capture has neutral padding and is not a screenshot of the entire macOS menu bar.
 
 To avoid requiring Screen Recording permission on CI, the harness snapshots the native window frame and composites an actual `WKWebView.takeSnapshot` image into its corresponding content rectangle. It is a documentation capture, not evidence that sign-in or live task rendering passed.
 
@@ -22,6 +23,6 @@ SCREENSHOT_BUILD=1 BUILD_DIR="$PWD/build/documentation" bash scripts/build.sh
   --screenshots "$PWD/build/screenshots"
 ```
 
-The app writes `screenshot-overview.png`, `screenshot-settings.png`, `screenshot-session-cost.png`, and `screenshot-organization-cost.png`, then exits. Review all four before copying them into `docs/`.
+The app writes `screenshot-overview.png`, `screenshot-settings.png`, `screenshot-session-cost.png`, `screenshot-organization-cost.png`, and `screenshot-menu-bar.png`, then exits. Review them before copying them into `docs/`.
 
 This build uses an ephemeral WebKit store and a separate UserDefaults suite, and does not start automatic network update checks. For local fixtures only, the capture harness passes a synthetic location into the same cost-display module inside the isolated content world. The regular build has no capture harness and does not include the fixture resource; never distribute the documentation build as the release app.
